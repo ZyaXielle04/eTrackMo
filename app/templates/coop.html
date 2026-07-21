@@ -58,114 +58,118 @@
           </div>
         </header>
 
-        <section class="coop-layout">
-          <article class="panel coop-action-panel">
+        <div id="coop-directory-view">
+          <section class="coop-layout">
+            <article class="panel coop-action-panel">
+              <div class="panel-header compact">
+                <div>
+                  <h2>Create Coop</h2>
+                  <p>Start a private group and approve members manually.</p>
+                </div>
+              </div>
+
+              <form id="create-coop-form" class="account-form">
+                <label>
+                  <span>Coop name</span>
+                  <input
+                    type="text"
+                    id="coop-name"
+                    maxlength="60"
+                    placeholder="Family finances, Dorm budget"
+                    autocomplete="off"
+                    required
+                  />
+                </label>
+
+                <label>
+                  <span>Description</span>
+                  <textarea
+                    id="coop-description"
+                    maxlength="160"
+                    rows="3"
+                    placeholder="Optional purpose for this Coop"
+                  ></textarea>
+                </label>
+
+                <div id="create-coop-error" class="inline-error" hidden></div>
+
+                <button type="submit" id="create-coop-button" class="primary-action">
+                  Create Coop
+                </button>
+              </form>
+            </article>
+
+            <article class="panel coop-action-panel">
+              <div class="panel-header compact">
+                <div>
+                  <h2>Join Coop</h2>
+                  <p>Send a request using an invite code from the owner.</p>
+                </div>
+              </div>
+
+              <form id="join-coop-form" class="account-form">
+                <label>
+                  <span>Invite code</span>
+                  <input
+                    type="text"
+                    id="coop-invite-code"
+                    maxlength="12"
+                    placeholder="AB12CD34"
+                    autocomplete="off"
+                    required
+                  />
+                </label>
+
+                <div class="permission-box">
+                  <strong>What you allow this Coop to see</strong>
+                  <label>
+                    <input type="checkbox" id="join-share-accounts" />
+                    <span>Account names</span>
+                  </label>
+                  <label>
+                    <input type="checkbox" id="join-share-balances" />
+                    <span>Balances</span>
+                  </label>
+                  <label>
+                    <input type="checkbox" id="join-share-transactions" />
+                    <span>Transactions</span>
+                  </label>
+                </div>
+
+                <div id="join-coop-error" class="inline-error" hidden></div>
+                <div id="join-coop-success" class="inline-state" hidden></div>
+
+                <button type="submit" id="join-coop-button" class="secondary-action">
+                  Request to join
+                </button>
+              </form>
+            </article>
+          </section>
+
+          <section class="panel coop-workspace">
             <div class="panel-header compact">
               <div>
-                <h2>Create Coop</h2>
-                <p>Start a private group and approve members manually.</p>
+                <h2>Your Coops</h2>
+                <p>Open a Coop to enter its dedicated shared-finance workspace.</p>
               </div>
             </div>
 
-            <form id="create-coop-form" class="account-form">
-              <label>
-                <span>Coop name</span>
-                <input
-                  type="text"
-                  id="coop-name"
-                  maxlength="60"
-                  placeholder="Family finances, Dorm budget"
-                  autocomplete="off"
-                  required
-                />
-              </label>
-
-              <label>
-                <span>Description</span>
-                <textarea
-                  id="coop-description"
-                  maxlength="160"
-                  rows="3"
-                  placeholder="Optional purpose for this Coop"
-                ></textarea>
-              </label>
-
-              <div id="create-coop-error" class="inline-error" hidden></div>
-
-              <button type="submit" id="create-coop-button" class="primary-action">
-                Create Coop
-              </button>
-            </form>
-          </article>
-
-          <article class="panel coop-action-panel">
-            <div class="panel-header compact">
-              <div>
-                <h2>Join Coop</h2>
-                <p>Send a request using an invite code from the owner.</p>
-              </div>
+            <div id="coops-loading" class="inline-state">
+              Loading Coops...
             </div>
 
-            <form id="join-coop-form" class="account-form">
-              <label>
-                <span>Invite code</span>
-                <input
-                  type="text"
-                  id="coop-invite-code"
-                  maxlength="12"
-                  placeholder="AB12CD34"
-                  autocomplete="off"
-                  required
-                />
-              </label>
+            <div id="coops-error" class="inline-error" hidden></div>
 
-              <div class="permission-box">
-                <strong>What you allow this Coop to see</strong>
-                <label>
-                  <input type="checkbox" id="join-share-accounts" />
-                  <span>Account names</span>
-                </label>
-                <label>
-                  <input type="checkbox" id="join-share-balances" />
-                  <span>Balances</span>
-                </label>
-                <label>
-                  <input type="checkbox" id="join-share-transactions" />
-                  <span>Transactions</span>
-                </label>
-              </div>
-
-              <div id="join-coop-error" class="inline-error" hidden></div>
-              <div id="join-coop-success" class="inline-state" hidden></div>
-
-              <button type="submit" id="join-coop-button" class="secondary-action">
-                Request to join
-              </button>
-            </form>
-          </article>
-        </section>
-
-        <section class="panel coop-workspace">
-          <div class="panel-header compact">
-            <div>
-              <h2>Your Coops</h2>
-              <p>Manage memberships, invite codes, requests, and permissions.</p>
+            <div id="coops-empty" class="empty-state" hidden>
+              <strong>No Coops yet</strong>
+              <span>Create a Coop or request to join one with an invite code.</span>
             </div>
-          </div>
 
-          <div id="coops-loading" class="inline-state">
-            Loading Coops...
-          </div>
+            <div id="coops-list" class="coop-list"></div>
+          </section>
+        </div>
 
-          <div id="coops-error" class="inline-error" hidden></div>
-
-          <div id="coops-empty" class="empty-state" hidden>
-            <strong>No Coops yet</strong>
-            <span>Create a Coop or request to join one with an invite code.</span>
-          </div>
-
-          <div id="coops-list" class="coop-list"></div>
-        </section>
+        <section id="coop-detail-view" class="coop-detail-view" hidden></section>
       </main>
     </div>
 

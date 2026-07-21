@@ -1070,6 +1070,84 @@ a {
   min-height: 520px;
 }
 
+.coop-detail-view {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.coop-detail-view[hidden] {
+  display: none !important;
+}
+
+.coop-detail-shell {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.coop-detail-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(320px, 0.8fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.coop-detail-hero h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.45rem;
+  letter-spacing: 0;
+}
+
+.coop-detail-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.coop-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.coop-detail-stats div {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+  padding: 0.72rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--panel-muted);
+}
+
+.coop-detail-stats strong,
+.coop-detail-stats span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coop-detail-stats strong {
+  font-size: 0.95rem;
+}
+
+.coop-detail-stats span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.coop-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.coop-shared-section {
+  grid-row: span 3;
+}
+
 .permission-box,
 .permission-toggle-form {
   display: grid;
@@ -1106,10 +1184,6 @@ a {
   gap: 0.85rem;
 }
 
-.coop-list.coop-focus .coop-card:not(.coop-card-focused) {
-  display: none;
-}
-
 .coop-card {
   display: grid;
   border: 1px solid var(--border-soft);
@@ -1124,7 +1198,6 @@ a {
   align-items: center;
   gap: 0.85rem;
   padding: 1rem;
-  cursor: pointer;
   list-style: none;
 }
 
@@ -1198,6 +1271,10 @@ a {
   font-weight: 850;
 }
 
+.coop-open-action {
+  white-space: nowrap;
+}
+
 .coop-card[open] .coop-chevron {
   border-color: #bfdbfe;
   background: var(--primary-soft);
@@ -1231,6 +1308,11 @@ a {
   gap: 0.65rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--border-soft);
+}
+
+.coop-detail-grid > .coop-section {
+  padding-top: 1rem;
+  border-top: 0;
 }
 
 .coop-section > strong {
@@ -1338,7 +1420,27 @@ a {
 
 .coop-shared-heading {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.65rem;
+}
+
+.coop-shared-heading > div {
+  display: grid;
   gap: 0.25rem;
+  min-width: 0;
+}
+
+.coop-shared-avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius);
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 850;
 }
 
 .coop-shared-heading small,
@@ -1763,6 +1865,15 @@ meter::-webkit-meter-optimum-value {
   .coop-layout {
     grid-template-columns: 1fr;
   }
+
+  .coop-detail-hero,
+  .coop-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coop-shared-section {
+    grid-row: auto;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1955,7 +2066,8 @@ meter::-webkit-meter-optimum-value {
   }
 
   .coop-role,
-  .coop-chevron {
+  .coop-chevron,
+  .coop-open-action {
     justify-self: start;
   }
 
@@ -1966,6 +2078,10 @@ meter::-webkit-meter-optimum-value {
 
   .coop-request-actions {
     flex-direction: column;
+  }
+
+  .coop-detail-stats {
+    grid-template-columns: 1fr;
   }
 }
 

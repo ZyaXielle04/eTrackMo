@@ -36,9 +36,14 @@ const coopsLoading = document.getElementById("coops-loading");
 const coopsError = document.getElementById("coops-error");
 const coopsEmpty = document.getElementById("coops-empty");
 const coopsList = document.getElementById("coops-list");
+const coopDirectoryView = document.getElementById("coop-directory-view");
+const coopDetailView = document.getElementById("coop-detail-view");
+const pageKicker = document.querySelector(".page-kicker");
+const pageTitle = document.querySelector(".topbar h1");
 
 let currentUser = null;
 let coops = [];
+let activeCoop = null;
 
 const pesoFormatter = new Intl.NumberFormat("en-PH", {
   currency: "PHP",
@@ -51,6 +56,17 @@ function cleanText(value) {
 
 function formatMoney(amount) {
   return pesoFormatter.format(Number(amount || 0));
+}
+
+function getInitials(value) {
+  return cleanText(value)
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(function (part) {
+      return part.charAt(0).toUpperCase();
+    })
+    .join("") || "M";
 }
 
 function getJoinPermissions() {
@@ -138,8 +154,8 @@ function renderPermissionPills(permissions) {
 
   labels.forEach(function ([key, label]) {
     const pill = document.createElement("span");
-    pill.className = permissions[key] ? "enabled" : "disabled";
-    pill.textContent = permissions[key] ? label : `No ${label}`;
+    pill.className = permissions?.[key] ? "enabled" : "disabled";
+    pill.textContent = permissions?.[key] ? label : `No ${label}`;
     wrap.append(pill);
   });
 
@@ -175,6 +191,7 @@ function createPermissionToggles(coop) {
 
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
+    clearError(coopsError);
     button.disabled = true;
     button.textContent = "Saving...";
 
@@ -191,7 +208,8 @@ function createPermissionToggles(coop) {
       });
 
       coop.permissions = data.permissions;
-      renderCoops();
+      await openCoop(coop.id);
+      await loadCoops({ preserveDetail: true });
     } catch (error) {
       showError(coopsError, error.message || "Unable to save permissions.");
     } finally {
@@ -231,7 +249,8 @@ function renderJoinRequest(coop, request) {
           `/api/coops/${coop.id}/join-requests/${request.id}/${decision}`,
           { method: "POST" },
         );
-        await loadCoops();
+        await openCoop(coop.id);
+        await loadCoops({ preserveDetail: true });
       } catch (error) {
         showError(coopsError, error.message || "Unable to update request.");
       }
@@ -245,10 +264,10 @@ function renderJoinRequest(coop, request) {
 }
 
 function renderCoopCard(coop) {
-  const card = document.createElement("details");
+  const card = document.createElement("article");
   card.className = "coop-card";
 
-  const header = document.createElement("summary");
+  const header = document.createElement("div");
   header.className = "coop-card-header";
 
   const titleWrap = document.createElement("div");
@@ -280,35 +299,89 @@ function renderCoopCard(coop) {
     stats.append(item);
   });
 
-  const chevron = document.createElement("span");
-  chevron.className = "coop-chevron";
-  chevron.textContent = "Open";
-
-  header.append(titleWrap, stats, role, chevron);
-
-  const details = document.createElement("div");
-  details.className = "coop-details";
-
-  const closeFocus = document.createElement("button");
-  closeFocus.type = "button";
-  closeFocus.className = "secondary-action coop-close-focus";
-  closeFocus.textContent = "Back to all Coops";
-  closeFocus.addEventListener("click", function () {
-    card.open = false;
-    updateFocusedCoop(null);
+  const openButton = document.createElement("button");
+  openButton.type = "button";
+  openButton.className = "secondary-action coop-open-action";
+  openButton.textContent = "Open Coop";
+  openButton.addEventListener("click", function () {
+    openCoop(coop.id);
   });
 
-  const permissions = document.createElement("div");
-  permissions.className = "coop-section";
-  const permissionsTitle = document.createElement("strong");
-  permissionsTitle.textContent = "Your sharing permissions";
-  permissions.append(permissionsTitle, createPermissionToggles(coop));
+  header.append(titleWrap, stats, role, openButton);
+  card.append(header);
 
-  const members = document.createElement("div");
-  members.className = "coop-section";
-  const memberTitle = document.createElement("strong");
-  memberTitle.textContent = "Members";
+  return card;
+}
+
+function renderCoopDetail(coop) {
+  coopDetailView.replaceChildren();
+
+  const shell = document.createElement("div");
+  shell.className = "coop-detail-shell";
+
+  const hero = document.createElement("section");
+  hero.className = "panel coop-detail-hero";
+
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.className = "secondary-action";
+  backButton.textContent = "Back to all Coops";
+  backButton.addEventListener("click", showDirectory);
+
+  const heading = document.createElement("div");
+  const kicker = document.createElement("span");
+  const title = document.createElement("h2");
+  const description = document.createElement("p");
+
+  kicker.className = "page-kicker";
+  kicker.textContent = coop.role === "owner" ? "Owner workspace" : "Member workspace";
+  title.textContent = coop.name;
+  description.textContent = coop.description || "Private shared finance group.";
+  heading.append(kicker, title, description);
+
+  const stats = document.createElement("div");
+  stats.className = "coop-detail-stats";
+
+  [
+    [String(coop.memberCount), "Members"],
+    [String(coop.pendingCount), "Pending requests"],
+    [coop.inviteCode, "Invite code"],
+  ].forEach(function ([value, label]) {
+    const item = document.createElement("div");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+
+    strong.textContent = value;
+    span.textContent = label;
+    item.append(strong, span);
+    stats.append(item);
+  });
+
+  hero.append(backButton, heading, stats);
+  shell.append(hero);
+
+  const grid = document.createElement("section");
+  grid.className = "coop-detail-grid";
+
+  grid.append(renderSharedData(coop));
+  grid.append(renderMembersPanel(coop));
+  grid.append(renderPermissionsPanel(coop));
+
+  if (coop.role === "owner") {
+    grid.append(renderRequestsPanel(coop));
+  }
+
+  shell.append(grid);
+  coopDetailView.append(shell);
+}
+
+function renderMembersPanel(coop) {
+  const panel = document.createElement("article");
+  panel.className = "panel coop-section";
+  const title = document.createElement("strong");
   const memberList = document.createElement("div");
+
+  title.textContent = "Members";
   memberList.className = "coop-member-list";
 
   (coop.members || []).forEach(function (member) {
@@ -319,70 +392,65 @@ function renderCoopCard(coop) {
     const name = document.createElement("strong");
     const role = document.createElement("small");
 
-    avatar.textContent = member.displayName.slice(0, 2).toUpperCase();
+    avatar.textContent = getInitials(member.displayName);
     name.textContent = member.displayName;
     role.textContent = member.role;
     body.append(name, role);
-    row.append(avatar, body);
-    row.append(renderPermissionPills(member.permissions));
+    row.append(avatar, body, renderPermissionPills(member.permissions));
     memberList.append(row);
   });
-  members.append(memberTitle, memberList);
 
-  details.append(closeFocus, permissions, members, renderSharedData(coop));
+  panel.append(title, memberList);
 
-  if (coop.role === "owner") {
-    const requests = document.createElement("div");
-    requests.className = "coop-section";
-    const requestTitle = document.createElement("strong");
-    requestTitle.textContent = "Pending requests";
-    const requestList = document.createElement("div");
-    requestList.className = "coop-request-list";
-
-    if ((coop.joinRequests || []).length) {
-      coop.joinRequests.forEach(function (request) {
-        requestList.append(renderJoinRequest(coop, request));
-      });
-    } else {
-      const empty = document.createElement("small");
-      empty.textContent = "No pending requests.";
-      requestList.append(empty);
-    }
-
-    requests.append(requestTitle, requestList);
-    details.append(requests);
-  }
-
-  card.append(header, details);
-  card.addEventListener("toggle", function () {
-    updateFocusedCoop(card.open ? card : null);
-  });
-
-  return card;
+  return panel;
 }
 
-function updateFocusedCoop(openCard) {
-  const cards = coopsList.querySelectorAll(".coop-card");
+function renderPermissionsPanel(coop) {
+  const panel = document.createElement("article");
+  panel.className = "panel coop-section";
+  const title = document.createElement("strong");
+  const description = document.createElement("small");
 
-  coopsList.classList.toggle("coop-focus", Boolean(openCard));
+  title.textContent = "Your sharing permissions";
+  description.textContent = "These controls decide what this Coop can see from your finance data.";
+  panel.append(title, description, createPermissionToggles(coop));
 
-  cards.forEach(function (card) {
-    const isFocused = card === openCard;
+  return panel;
+}
 
-    card.classList.toggle("coop-card-focused", isFocused);
+function renderRequestsPanel(coop) {
+  const panel = document.createElement("article");
+  panel.className = "panel coop-section";
+  const title = document.createElement("strong");
+  const requestList = document.createElement("div");
 
-    if (openCard && !isFocused) {
-      card.open = false;
-    }
-  });
+  title.textContent = "Pending requests";
+  requestList.className = "coop-request-list";
+
+  if ((coop.joinRequests || []).length) {
+    coop.joinRequests.forEach(function (request) {
+      requestList.append(renderJoinRequest(coop, request));
+    });
+  } else {
+    const empty = document.createElement("small");
+    empty.textContent = "No pending requests.";
+    requestList.append(empty);
+  }
+
+  panel.append(title, requestList);
+
+  return panel;
 }
 
 function renderSharedData(coop) {
-  const section = document.createElement("div");
-  section.className = "coop-section coop-shared-section";
+  const section = document.createElement("article");
+  section.className = "panel coop-section coop-shared-section";
   const title = document.createElement("strong");
-  title.textContent = "Shared finance data";
+  const description = document.createElement("small");
   const list = document.createElement("div");
+
+  title.textContent = "Shared finance data";
+  description.textContent = "Only accounts, balances, and transactions allowed by each member are shown here.";
   list.className = "coop-shared-list";
 
   (coop.members || []).forEach(function (member) {
@@ -390,7 +458,7 @@ function renderSharedData(coop) {
     list.append(renderSharedMemberData(member, sharedData));
   });
 
-  section.append(title, list);
+  section.append(title, description, list);
 
   return section;
 }
@@ -400,12 +468,17 @@ function renderSharedMemberData(member, sharedData) {
   card.className = "coop-shared-member";
   const heading = document.createElement("div");
   heading.className = "coop-shared-heading";
+  const avatar = document.createElement("span");
+  const body = document.createElement("div");
   const title = document.createElement("strong");
   const meta = document.createElement("small");
 
+  avatar.className = "coop-shared-avatar";
+  avatar.textContent = getInitials(member.displayName);
   title.textContent = member.displayName;
   meta.textContent = "Visible based on this member's permissions";
-  heading.append(title, meta, renderPermissionPills(member.permissions));
+  body.append(title, meta, renderPermissionPills(member.permissions));
+  heading.append(avatar, body);
   card.append(heading);
 
   if (member.permissions?.shareAccounts) {
@@ -498,31 +571,62 @@ function renderSharedEmpty(message) {
   return empty;
 }
 
-async function loadCoopDetails(coop) {
-  const data = await apiRequest(`/api/coops/${coop.id}`);
+async function loadCoopDetails(coopId) {
+  const data = await apiRequest(`/api/coops/${coopId}`);
 
   return data.coop;
 }
 
-async function renderCoops() {
+async function openCoop(coopId) {
+  clearError(coopsError);
+  coopDetailView.replaceChildren();
+  coopDetailView.append(renderSharedEmpty("Opening Coop workspace..."));
+  coopDirectoryView.hidden = true;
+  coopDetailView.hidden = false;
+
+  try {
+    activeCoop = await loadCoopDetails(coopId);
+    renderCoopDetail(activeCoop);
+    pageKicker.textContent = "Coop workspace";
+    pageTitle.textContent = activeCoop.name;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    showDirectory();
+    showError(coopsError, error.message || "Unable to open Coop.");
+  }
+}
+
+function showDirectory() {
+  activeCoop = null;
+  coopDetailView.hidden = true;
+  coopDetailView.replaceChildren();
+  coopDirectoryView.hidden = false;
+  pageKicker.textContent = "Shared finance";
+  pageTitle.textContent = "Coop";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderCoops() {
   coopsList.replaceChildren();
   coopsEmpty.hidden = coops.length > 0;
 
-  const detailedCoops = await Promise.all(coops.map(loadCoopDetails));
-
-  detailedCoops.forEach(function (coop) {
+  coops.forEach(function (coop) {
     coopsList.append(renderCoopCard(coop));
   });
 }
 
-async function loadCoops() {
+async function loadCoops(options = {}) {
   setLoading(true);
   clearError(coopsError);
 
   try {
     const data = await apiRequest("/api/coops");
     coops = data.coops || [];
-    await renderCoops();
+    renderCoops();
+
+    if (!options.preserveDetail) {
+      showDirectory();
+    }
   } catch (error) {
     showError(coopsError, error.message || "Unable to load Coops.");
   } finally {

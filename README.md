@@ -19,7 +19,8 @@ Admin SDK on the backend for trusted database writes.
 - Split backend API routes into feature-focused modules before Coop development
 - Coop creation, invite-code join requests, owner approvals, and granular sharing permissions
 - Expandable Coop group details for members, invite codes, requests, and permissions
-- Coop detail views display shared member accounts, balances, and transactions according to permissions
+- Dedicated Coop workspace view that replaces the directory when a Coop is opened
+- Coop workspace displays shared member accounts, balances, and transactions according to permissions
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration
