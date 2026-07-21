@@ -236,10 +236,10 @@ function renderJoinRequest(coop, request) {
 }
 
 function renderCoopCard(coop) {
-  const card = document.createElement("article");
+  const card = document.createElement("details");
   card.className = "coop-card";
 
-  const header = document.createElement("div");
+  const header = document.createElement("summary");
   header.className = "coop-card-header";
 
   const titleWrap = document.createElement("div");
@@ -253,8 +253,6 @@ function renderCoopCard(coop) {
   const role = document.createElement("span");
   role.className = "coop-role";
   role.textContent = coop.role === "owner" ? "Owner" : "Member";
-
-  header.append(titleWrap, role);
 
   const stats = document.createElement("div");
   stats.className = "coop-stats";
@@ -272,6 +270,15 @@ function renderCoopCard(coop) {
     item.append(strong, text);
     stats.append(item);
   });
+
+  const chevron = document.createElement("span");
+  chevron.className = "coop-chevron";
+  chevron.textContent = "Open";
+
+  header.append(titleWrap, stats, role, chevron);
+
+  const details = document.createElement("div");
+  details.className = "coop-details";
 
   const permissions = document.createElement("div");
   permissions.className = "coop-section";
@@ -304,7 +311,7 @@ function renderCoopCard(coop) {
   });
   members.append(memberTitle, memberList);
 
-  card.append(header, stats, permissions, members);
+  details.append(permissions, members);
 
   if (coop.role === "owner") {
     const requests = document.createElement("div");
@@ -325,8 +332,10 @@ function renderCoopCard(coop) {
     }
 
     requests.append(requestTitle, requestList);
-    card.append(requests);
+    details.append(requests);
   }
+
+  card.append(header, details);
 
   return card;
 }
