@@ -1106,6 +1106,10 @@ a {
   gap: 0.85rem;
 }
 
+.coop-list.coop-focus .coop-card:not(.coop-card-focused) {
+  display: none;
+}
+
 .coop-card {
   display: grid;
   border: 1px solid var(--border-soft);
@@ -1218,6 +1222,10 @@ a {
   padding: 1rem;
 }
 
+.coop-close-focus {
+  justify-self: start;
+}
+
 .coop-section {
   display: grid;
   gap: 0.65rem;
@@ -1312,6 +1320,79 @@ a {
 .coop-request-actions {
   display: flex;
   gap: 0.45rem;
+}
+
+.coop-shared-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.coop-shared-member {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.coop-shared-heading {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.coop-shared-heading small,
+.coop-shared-empty {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.coop-shared-block {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.coop-shared-block > b {
+  font-size: 0.8rem;
+}
+
+.coop-shared-grid {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.coop-shared-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  padding: 0.62rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--panel-muted);
+}
+
+.coop-shared-row span,
+.coop-shared-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coop-shared-row span {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+}
+
+.coop-shared-row strong {
+  font-size: 0.8rem;
+}
+
+.coop-shared-row strong.positive {
+  color: var(--success);
+}
+
+.coop-shared-row strong.negative {
+  color: var(--danger);
 }
 
 .activity-panel {

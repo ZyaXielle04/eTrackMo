@@ -40,8 +40,17 @@ const coopsList = document.getElementById("coops-list");
 let currentUser = null;
 let coops = [];
 
+const pesoFormatter = new Intl.NumberFormat("en-PH", {
+  currency: "PHP",
+  style: "currency",
+});
+
 function cleanText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function formatMoney(amount) {
+  return pesoFormatter.format(Number(amount || 0));
 }
 
 function getJoinPermissions() {
@@ -280,6 +289,15 @@ function renderCoopCard(coop) {
   const details = document.createElement("div");
   details.className = "coop-details";
 
+  const closeFocus = document.createElement("button");
+  closeFocus.type = "button";
+  closeFocus.className = "secondary-action coop-close-focus";
+  closeFocus.textContent = "Back to all Coops";
+  closeFocus.addEventListener("click", function () {
+    card.open = false;
+    updateFocusedCoop(null);
+  });
+
   const permissions = document.createElement("div");
   permissions.className = "coop-section";
   const permissionsTitle = document.createElement("strong");
@@ -311,7 +329,7 @@ function renderCoopCard(coop) {
   });
   members.append(memberTitle, memberList);
 
-  details.append(permissions, members);
+  details.append(closeFocus, permissions, members, renderSharedData(coop));
 
   if (coop.role === "owner") {
     const requests = document.createElement("div");
@@ -336,8 +354,148 @@ function renderCoopCard(coop) {
   }
 
   card.append(header, details);
+  card.addEventListener("toggle", function () {
+    updateFocusedCoop(card.open ? card : null);
+  });
 
   return card;
+}
+
+function updateFocusedCoop(openCard) {
+  const cards = coopsList.querySelectorAll(".coop-card");
+
+  coopsList.classList.toggle("coop-focus", Boolean(openCard));
+
+  cards.forEach(function (card) {
+    const isFocused = card === openCard;
+
+    card.classList.toggle("coop-card-focused", isFocused);
+
+    if (openCard && !isFocused) {
+      card.open = false;
+    }
+  });
+}
+
+function renderSharedData(coop) {
+  const section = document.createElement("div");
+  section.className = "coop-section coop-shared-section";
+  const title = document.createElement("strong");
+  title.textContent = "Shared finance data";
+  const list = document.createElement("div");
+  list.className = "coop-shared-list";
+
+  (coop.members || []).forEach(function (member) {
+    const sharedData = coop.sharedData?.[member.uid] || {};
+    list.append(renderSharedMemberData(member, sharedData));
+  });
+
+  section.append(title, list);
+
+  return section;
+}
+
+function renderSharedMemberData(member, sharedData) {
+  const card = document.createElement("article");
+  card.className = "coop-shared-member";
+  const heading = document.createElement("div");
+  heading.className = "coop-shared-heading";
+  const title = document.createElement("strong");
+  const meta = document.createElement("small");
+
+  title.textContent = member.displayName;
+  meta.textContent = "Visible based on this member's permissions";
+  heading.append(title, meta, renderPermissionPills(member.permissions));
+  card.append(heading);
+
+  if (member.permissions?.shareAccounts) {
+    card.append(renderSharedAccounts(sharedData.accounts || [], member.permissions));
+  } else {
+    card.append(renderSharedEmpty("Accounts are not shared."));
+  }
+
+  if (member.permissions?.shareTransactions) {
+    card.append(renderSharedTransactions(sharedData.transactions || []));
+  } else {
+    card.append(renderSharedEmpty("Transactions are not shared."));
+  }
+
+  return card;
+}
+
+function renderSharedAccounts(accounts, permissions) {
+  const section = document.createElement("div");
+  section.className = "coop-shared-block";
+  const title = document.createElement("b");
+  const list = document.createElement("div");
+
+  title.textContent = "Accounts";
+  list.className = "coop-shared-grid";
+
+  if (!accounts.length) {
+    list.append(renderSharedEmpty("No shared accounts yet."));
+  }
+
+  accounts.forEach(function (account) {
+    const row = document.createElement("div");
+    row.className = "coop-shared-row";
+    const name = document.createElement("span");
+    const detail = document.createElement("strong");
+
+    name.textContent = account.name;
+    detail.textContent = permissions.shareBalances
+      ? formatMoney(account.balance)
+      : "Balance hidden";
+    row.append(name, detail);
+    list.append(row);
+  });
+
+  section.append(title, list);
+
+  return section;
+}
+
+function renderSharedTransactions(transactions) {
+  const section = document.createElement("div");
+  section.className = "coop-shared-block";
+  const title = document.createElement("b");
+  const list = document.createElement("div");
+
+  title.textContent = "Transactions";
+  list.className = "coop-shared-grid";
+
+  if (!transactions.length) {
+    list.append(renderSharedEmpty("No shared transactions yet."));
+  }
+
+  transactions.slice(0, 8).forEach(function (transaction) {
+    const row = document.createElement("div");
+    row.className = "coop-shared-row";
+    const body = document.createElement("span");
+    const amount = document.createElement("strong");
+
+    body.textContent = [
+      transaction.description,
+      transaction.accountName,
+      transaction.occurredAt,
+    ].filter(Boolean).join(" - ");
+    amount.textContent = formatMoney(transaction.amount);
+    amount.className = transaction.amountCents >= 0 ? "positive" : "negative";
+    row.append(body, amount);
+    list.append(row);
+  });
+
+  section.append(title, list);
+
+  return section;
+}
+
+function renderSharedEmpty(message) {
+  const empty = document.createElement("small");
+  empty.className = "coop-shared-empty";
+  empty.textContent = message;
+
+  return empty;
 }
 
 async function loadCoopDetails(coop) {

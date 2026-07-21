@@ -6,7 +6,11 @@ from firebase_admin import db
 from flask import jsonify
 
 from app.routes.api import api
+from app.routes.api.common import account_ref
 from app.routes.api.common import clean_finance_text
+from app.routes.api.common import normalize_account
+from app.routes.api.common import normalize_transaction
+from app.routes.api.common import transactions_ref
 from app.security import clean_text
 from app.security import firebase_auth_required
 from app.security import get_json_payload
@@ -189,6 +193,91 @@ def normalize_coop(coop_id, coop, include_details=False):
     return normalized
 
 
+def get_shared_member_data(member):
+    uid = member.get("uid")
+    permissions = normalize_permissions(member.get("permissions"))
+    shared = {
+        "accounts": [],
+        "transactions": [],
+        "uid": uid,
+    }
+
+    if not uid:
+        return shared
+
+    accounts = account_ref(uid).get() or {}
+    account_names = {}
+
+    if isinstance(accounts, dict):
+        account_names = {
+            account_id: account.get("name", "Account")
+            for account_id, account in accounts.items()
+            if isinstance(account, dict)
+        }
+
+    if permissions["shareAccounts"] and isinstance(accounts, dict):
+        shared["accounts"] = [
+            prepare_shared_account(account_id, account, permissions)
+            for account_id, account in accounts.items()
+            if isinstance(account, dict)
+        ]
+
+    if permissions["shareTransactions"]:
+        transactions = transactions_ref(uid).get() or {}
+
+        if isinstance(transactions, dict):
+            normalized_transactions = [
+                prepare_shared_transaction(
+                    transaction_id,
+                    transaction,
+                    account_names,
+                    permissions,
+                )
+                for transaction_id, transaction in transactions.items()
+                if isinstance(transaction, dict)
+            ]
+            normalized_transactions.sort(
+                key=lambda transaction: (
+                    transaction.get("occurredAt") or "",
+                    transaction.get("createdAt") or 0,
+                ),
+                reverse=True,
+            )
+            shared["transactions"] = normalized_transactions[:50]
+
+    return shared
+
+
+def prepare_shared_account(account_id, account, permissions):
+    shared_account = normalize_account(account_id, account)
+
+    if not permissions["shareBalances"]:
+        shared_account.pop("balance", None)
+        shared_account.pop("balanceCents", None)
+
+    return shared_account
+
+
+def prepare_shared_transaction(
+    transaction_id,
+    transaction,
+    account_names,
+    permissions,
+):
+    safe_account_names = account_names if permissions["shareAccounts"] else {}
+    shared_transaction = normalize_transaction(
+        transaction_id,
+        transaction,
+        safe_account_names,
+    )
+
+    if not permissions["shareAccounts"]:
+        shared_transaction["accountId"] = ""
+        shared_transaction["accountName"] = "Shared account"
+
+    return shared_transaction
+
+
 @api.get("/coops")
 @rate_limit(max_requests=120, window_seconds=60)
 @firebase_auth_required()
@@ -284,6 +373,10 @@ def get_coop(decoded_token, coop_id):
     normalized = normalize_coop(coop_id, coop, True)
     normalized["role"] = member.get("role", "member")
     normalized["permissions"] = normalize_permissions(member.get("permissions"))
+    normalized["sharedData"] = {
+        shared_member["uid"]: get_shared_member_data(shared_member)
+        for shared_member in normalized.get("members", [])
+    }
 
     return jsonify({"coop": normalized})
 
