@@ -1131,6 +1131,35 @@ a {
   font-size: 0.95rem;
 }
 
+.coop-copy-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.coop-copy-code:hover,
+.coop-copy-code:focus-visible {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.coop-copy-code.copied {
+  color: var(--success);
+  text-decoration: none;
+}
+
 .coop-detail-stats span {
   color: var(--muted);
   font-size: 0.72rem;

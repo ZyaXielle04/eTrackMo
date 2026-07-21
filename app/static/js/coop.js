@@ -58,6 +58,67 @@ function formatMoney(amount) {
   return pesoFormatter.format(Number(amount || 0));
 }
 
+async function copyTextToClipboard(value) {
+  const text = cleanText(value);
+
+  if (!text) {
+    throw new Error("Nothing to copy.");
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-999px";
+  textarea.style.left = "-999px";
+  document.body.append(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand("copy");
+  } finally {
+    textarea.remove();
+  }
+}
+
+function createInviteCodeButton(inviteCode) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "coop-copy-code";
+  button.title = "Copy invite code";
+  button.setAttribute("aria-label", `Copy invite code ${inviteCode}`);
+  button.textContent = inviteCode;
+
+  button.addEventListener("click", async function (event) {
+    event.stopPropagation();
+
+    try {
+      await copyTextToClipboard(inviteCode);
+      button.classList.add("copied");
+      button.textContent = "Copied";
+
+      window.setTimeout(function () {
+        button.classList.remove("copied");
+        button.textContent = inviteCode;
+      }, 1400);
+    } catch (error) {
+      button.textContent = "Copy failed";
+
+      window.setTimeout(function () {
+        button.textContent = inviteCode;
+      }, 1600);
+    }
+  });
+
+  return button;
+}
+
 function getInitials(value) {
   return cleanText(value)
     .split(" ")
@@ -286,15 +347,20 @@ function renderCoopCard(coop) {
   stats.className = "coop-stats";
 
   [
-    [String(coop.memberCount), "members"],
-    [String(coop.pendingCount), "pending"],
-    [coop.inviteCode, "invite code"],
-  ].forEach(function ([value, label]) {
+    [String(coop.memberCount), "members", false],
+    [String(coop.pendingCount), "pending", false],
+    [coop.inviteCode, "invite code", true],
+  ].forEach(function ([value, label, isInviteCode]) {
     const item = document.createElement("span");
-    const strong = document.createElement("strong");
+    const strong = isInviteCode
+      ? createInviteCodeButton(value)
+      : document.createElement("strong");
     const text = document.createTextNode(` ${label}`);
 
-    strong.textContent = value;
+    if (!isInviteCode) {
+      strong.textContent = value;
+    }
+
     item.append(strong, text);
     stats.append(item);
   });
@@ -343,15 +409,20 @@ function renderCoopDetail(coop) {
   stats.className = "coop-detail-stats";
 
   [
-    [String(coop.memberCount), "Members"],
-    [String(coop.pendingCount), "Pending requests"],
-    [coop.inviteCode, "Invite code"],
-  ].forEach(function ([value, label]) {
+    [String(coop.memberCount), "Members", false],
+    [String(coop.pendingCount), "Pending requests", false],
+    [coop.inviteCode, "Invite code", true],
+  ].forEach(function ([value, label, isInviteCode]) {
     const item = document.createElement("div");
-    const strong = document.createElement("strong");
+    const strong = isInviteCode
+      ? createInviteCodeButton(value)
+      : document.createElement("strong");
     const span = document.createElement("span");
 
-    strong.textContent = value;
+    if (!isInviteCode) {
+      strong.textContent = value;
+    }
+
     span.textContent = label;
     item.append(strong, span);
     stats.append(item);
