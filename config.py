@@ -19,6 +19,10 @@ class Config:
         "FIREBASE_CREDENTIALS_PATH"
     )
 
+    FIREBASE_SERVICE_ACCOUNT_JSON = os.getenv(
+        "FIREBASE_SERVICE_ACCOUNT_JSON"
+    )
+
     FIREBASE_DATABASE_URL = os.getenv(
         "FIREBASE_DATABASE_URL"
     )
@@ -84,7 +88,6 @@ class Config:
 
     REQUIRED_ENV_VARS = (
         "SECRET_KEY",
-        "FIREBASE_CREDENTIALS_PATH",
         "FIREBASE_DATABASE_URL",
         "FIREBASE_API_KEY",
         "FIREBASE_AUTH_DOMAIN",
@@ -109,6 +112,15 @@ class Config:
             raise RuntimeError(
                 "Missing required environment variables: "
                 + ", ".join(missing)
+            )
+
+        if not (
+            cls.FIREBASE_CREDENTIALS_PATH
+            or cls.FIREBASE_SERVICE_ACCOUNT_JSON
+        ):
+            raise RuntimeError(
+                "Set FIREBASE_CREDENTIALS_PATH or "
+                "FIREBASE_SERVICE_ACCOUNT_JSON."
             )
 
         if len(cls.SECRET_KEY) < 32:

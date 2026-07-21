@@ -27,6 +27,7 @@ Admin SDK on the backend for trusted database writes.
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration
 - Backend-controlled database writes through Firebase Admin SDK
+- Vercel-ready Firebase Admin credential loading from secret environment JSON
 
 ## Planned Features
 
@@ -105,7 +106,8 @@ Place it at:
 credentials/firebase-service-account.json
 ```
 
-Keep this file private. It is required for the backend Firebase Admin SDK.
+Keep this file private. It is required for local backend Firebase Admin SDK
+development.
 
 5. Fill in the Firebase and Flask values in `.env`.
 
@@ -114,6 +116,7 @@ SECRET_KEY=replace-with-at-least-32-random-characters
 FLASK_DEBUG=False
 APP_REQUIRE_CONFIG=True
 FIREBASE_CREDENTIALS_PATH=credentials/firebase-service-account.json
+FIREBASE_SERVICE_ACCOUNT_JSON=
 FIREBASE_DATABASE_URL=https://your-project-id-default-rtdb.region.firebasedatabase.app
 FIREBASE_API_KEY=your-firebase-web-api-key
 FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
@@ -135,6 +138,18 @@ Then open:
 ```text
 http://127.0.0.1:5000
 ```
+
+## Vercel Deployment
+
+For Vercel, do not upload or commit the service account JSON file. Add the
+full JSON contents as a Vercel environment variable instead:
+
+```text
+FIREBASE_SERVICE_ACCOUNT_JSON
+```
+
+The app will use `FIREBASE_SERVICE_ACCOUNT_JSON` when present. Local
+development can continue using `FIREBASE_CREDENTIALS_PATH`.
 
 ## Firebase Database Rules
 

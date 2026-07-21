@@ -79,7 +79,8 @@ def create_app():
 
     initialize_firebase(
         app.config["FIREBASE_CREDENTIALS_PATH"],
-        app.config["FIREBASE_DATABASE_URL"]
+        app.config["FIREBASE_DATABASE_URL"],
+        app.config["FIREBASE_SERVICE_ACCOUNT_JSON"],
     )
 
     from app.routes import main
