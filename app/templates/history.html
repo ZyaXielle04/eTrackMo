@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search, filter, and review every transaction across your accounts."
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>History | eTrackMo</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=18"
+    />
+  </head>
+
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-gate-card">
+        <img
+          src="{{ url_for('static', filename='images/hero-logo.png') }}"
+          alt="eTrackMo Logo"
+        />
+        <strong>Opening history</strong>
+        <span>Checking your secure session...</span>
+      </div>
+    </div>
+
+    <div id="dashboard-app" class="dashboard-app" hidden>
+      {% include "partials/sidebar.html" %}
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div class="topbar-heading">
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="sidebar-toggle"
+              aria-controls="sidebar"
+              aria-expanded="false"
+              aria-label="Open navigation"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div>
+              <span class="page-kicker">Complete activity log</span>
+              <h1>History</h1>
+            </div>
+          </div>
+        </header>
+
+        <section class="history-summary" aria-label="History summary">
+          <article class="metric-card metric-card-primary">
+            <div class="metric-topline">
+              <span>Net movement</span>
+              <small>Filtered</small>
+            </div>
+            <strong id="history-net-total">PHP 0.00</strong>
+            <p id="history-net-label">Across 0 transactions</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Money in</span>
+              <small>Income</small>
+            </div>
+            <strong id="history-income-total">PHP 0.00</strong>
+            <p>Positive movement</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Money out</span>
+              <small>Outflow</small>
+            </div>
+            <strong id="history-outflow-total">PHP 0.00</strong>
+            <p>Expenses, sends, and fees</p>
+          </article>
+        </section>
+
+        <section class="panel history-panel">
+          <div class="panel-header compact">
+            <div>
+              <h2>Transaction history</h2>
+              <p>Search and filter every recorded money movement.</p>
+            </div>
+          </div>
+
+          <form id="history-filters" class="history-filters">
+            <label>
+              <span>Search</span>
+              <input
+                type="search"
+                id="history-search"
+                maxlength="80"
+                placeholder="Description, account, recipient, category"
+                autocomplete="off"
+              />
+            </label>
+
+            <label>
+              <span>Type</span>
+              <select id="history-kind">
+                <option value="all">All types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+                <option value="transfer">Transfer</option>
+                <option value="external_transfer">Send</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Account</span>
+              <select id="history-account">
+                <option value="all">All accounts</option>
+              </select>
+            </label>
+
+            <label>
+              <span>From</span>
+              <input type="date" id="history-from" />
+            </label>
+
+            <label>
+              <span>To</span>
+              <input type="date" id="history-to" />
+            </label>
+
+            <button type="reset" class="secondary-action">
+              Clear
+            </button>
+          </form>
+
+          <div id="history-loading" class="inline-state">
+            Loading history...
+          </div>
+
+          <div id="history-error" class="inline-error" hidden></div>
+
+          <div id="history-empty" class="empty-state" hidden>
+            <strong>No matching transactions</strong>
+            <span>Adjust the filters or create transactions first.</span>
+          </div>
+
+          <div id="history-list" class="history-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/dashboard.js') }}?v=13"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/history.js') }}?v=1"
+    ></script>
+  </body>
+</html>

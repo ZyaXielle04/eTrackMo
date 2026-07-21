@@ -61,6 +61,18 @@ class SecuritySmokeTests(unittest.TestCase):
         self.assertIn(b"Transactions", response.data)
 
     @mock.patch("app.initialize_firebase")
+    def test_history_page_renders(self, initialize_firebase):
+        from app import create_app
+
+        app = create_app()
+        client = app.test_client()
+
+        response = client.get("/history")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Transaction history", response.data)
+
+    @mock.patch("app.initialize_firebase")
     def test_account_writes_require_csrf(self, initialize_firebase):
         from app import create_app
 

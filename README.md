@@ -14,6 +14,7 @@ Admin SDK on the backend for trusted database writes.
 - Date and time tracking for transaction records
 - Dropdown-based transaction categories for cleaner reporting data
 - Optional transaction fees for transfer-style money movement
+- Searchable and filterable transaction history page
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration
@@ -21,7 +22,6 @@ Admin SDK on the backend for trusted database writes.
 
 ## Planned Features
 
-- Searchable transaction history
 - Transaction editing and deletion
 - Multi-account finance overview
 - Coop groups for permission-based financial visibility between users

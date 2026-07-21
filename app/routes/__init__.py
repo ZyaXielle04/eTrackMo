@@ -101,15 +101,9 @@ def transactions():
 def history():
 
     return render_template(
-        "internal_page.html",
+        "history.html",
         firebase_config=get_firebase_config(),
-        active_page="history",
-        page_title="History",
-        page_kicker="Complete activity log",
-        page_heading="History",
-        page_description="Review every transaction across all of your accounts.",
-        panel_title="Transaction history",
-        panel_body="This page will show the full searchable transaction history."
+        active_page="history"
     )
 
 
