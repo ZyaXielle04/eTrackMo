@@ -10,7 +10,10 @@ Admin SDK on the backend for trusted database writes.
 - Register, login, forgot password, and email verification flows
 - Protected dashboard shell
 - Accounts page for creating, editing, deleting, and reviewing balances
-- Transactions page for recording income, expenses, and account transfers
+- Transactions page for recording income, expenses, account transfers, and external sends
+- Date and time tracking for transaction records
+- Dropdown-based transaction categories for cleaner reporting data
+- Optional transaction fees for transfer-style money movement
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration

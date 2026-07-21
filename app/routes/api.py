@@ -33,7 +33,49 @@ TRANSACTION_KINDS = {
     "income",
     "expense",
     "transfer",
+    "external_transfer",
 }
+
+TRANSACTION_CATEGORIES = {
+    "expense": {
+        "food",
+        "transportation",
+        "bills",
+        "shopping",
+        "health",
+        "education",
+        "entertainment",
+        "family",
+        "debt",
+        "other_expense",
+    },
+    "income": {
+        "salary",
+        "business",
+        "freelance",
+        "allowance",
+        "refund",
+        "bonus",
+        "other_income",
+    },
+    "transfer": {
+        "savings",
+        "cash_in",
+        "cash_out",
+        "account_transfer",
+        "other_transfer",
+    },
+    "external_transfer": {
+        "family",
+        "remittance",
+        "payment",
+        "debt",
+        "donation",
+        "other_send",
+    },
+}
+
+TEXT_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 .,'&()/_:+#-]*$")
 
 
 def parse_balance_cents(value):
@@ -96,8 +138,13 @@ def normalize_transaction(transaction_id, transaction, account_names=None):
         "category": transaction.get("category", ""),
         "currency": transaction.get("currency", "PHP"),
         "description": transaction.get("description", ""),
+        "fee": int(transaction.get("feeCents") or 0) / 100,
+        "feeCents": int(transaction.get("feeCents") or 0),
         "kind": transaction.get("kind", "expense"),
         "occurredAt": transaction.get("occurredAt"),
+        "occurredDate": transaction.get("occurredDate"),
+        "occurredTime": transaction.get("occurredTime"),
+        "recipient": transaction.get("recipient", ""),
         "transferId": transaction.get("transferId"),
         "createdAt": transaction.get("createdAt"),
     }
@@ -112,21 +159,90 @@ def parse_positive_amount_cents(value):
     return amount_cents
 
 
-def clean_transaction_date(value):
-    if not value:
-        return date.today().isoformat()
+def parse_optional_fee_cents(value):
+    if value in (None, ""):
+        return 0
 
+    fee_cents = parse_balance_cents(value)
+
+    if fee_cents is None or fee_cents < 0 or fee_cents > 10000000:
+        return None
+
+    return fee_cents
+
+
+def clean_finance_text(value, min_length=1, max_length=80):
+    text = clean_text(value, min_length=min_length, max_length=max_length)
+
+    if not text or not TEXT_PATTERN.fullmatch(text):
+        return None
+
+    return text
+
+
+def clean_transaction_category(kind, value):
+    category = clean_text(value, min_length=1, max_length=40)
+
+    if not category:
+        return None
+
+    if category not in TRANSACTION_CATEGORIES.get(kind, set()):
+        return None
+
+    return category
+
+
+def clean_transaction_date(value):
     text = clean_text(value, min_length=10, max_length=10)
 
     if not text:
         return None
 
     try:
-        datetime.strptime(text, "%Y-%m-%d")
+        parsed_date = datetime.strptime(text, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+    if parsed_date > date.today():
+        return None
+
+    return text
+
+
+def clean_transaction_time(value):
+    text = clean_text(value, min_length=5, max_length=5)
+
+    if not text:
+        return None
+
+    try:
+        datetime.strptime(text, "%H:%M")
     except ValueError:
         return None
 
     return text
+
+
+def clean_transaction_datetime(date_value, time_value):
+    clean_date = clean_transaction_date(date_value)
+    clean_time = clean_transaction_time(time_value)
+
+    if not clean_date or not clean_time:
+        return None
+
+    occurred_datetime = datetime.strptime(
+        f"{clean_date}T{clean_time}",
+        "%Y-%m-%dT%H:%M",
+    )
+
+    if occurred_datetime > datetime.now():
+        return None
+
+    return {
+        "date": clean_date,
+        "datetime": f"{clean_date}T{clean_time}",
+        "time": clean_time,
+    }
 
 
 def adjust_account_balance(uid, account_id, amount_cents):
@@ -147,9 +263,17 @@ def write_transaction(
     kind,
     category="",
     occurred_at=None,
+    occurred_date=None,
+    occurred_time=None,
     transfer_id=None,
+    fee_cents=0,
+    recipient="",
 ):
     transaction_id = uuid4().hex
+    now = datetime.now()
+    fallback_date = now.date().isoformat()
+    fallback_time = now.strftime("%H:%M")
+    fallback_datetime = f"{fallback_date}T{fallback_time}"
 
     transactions_ref(uid).child(transaction_id).set(
         {
@@ -158,8 +282,12 @@ def write_transaction(
             "category": category,
             "currency": "PHP",
             "description": description,
+            "feeCents": fee_cents,
             "kind": kind,
-            "occurredAt": occurred_at or date.today().isoformat(),
+            "occurredAt": occurred_at or fallback_datetime,
+            "occurredDate": occurred_date or fallback_date,
+            "occurredTime": occurred_time or fallback_time,
+            "recipient": recipient,
             "transferId": transfer_id,
             "createdAt": {".sv": "timestamp"},
         }
@@ -488,13 +616,26 @@ def create_transaction(decoded_token):
         min_length=32,
         max_length=32,
     )
-    description = clean_text(payload.get("description"), min_length=2, max_length=120)
-    category = clean_text(payload.get("category"), max_length=40) or ""
+    description = clean_finance_text(
+        payload.get("description"),
+        min_length=2,
+        max_length=120,
+    )
+    recipient = clean_finance_text(payload.get("recipient"), max_length=80) or ""
     amount_cents = parse_positive_amount_cents(payload.get("amount"))
-    occurred_at = clean_transaction_date(payload.get("occurredAt"))
+    fee_cents = parse_optional_fee_cents(payload.get("fee"))
+    occurred = clean_transaction_datetime(
+        payload.get("occurredAt"),
+        payload.get("occurredTime"),
+    )
 
     if kind not in TRANSACTION_KINDS:
         return json_error("Please choose a valid transaction type.")
+
+    category = clean_transaction_category(kind, payload.get("category"))
+
+    if not category:
+        return json_error("Please choose a valid category.")
 
     if not is_valid_account_id(account_id):
         return json_error("Please choose a valid account.")
@@ -502,11 +643,17 @@ def create_transaction(decoded_token):
     if amount_cents is None:
         return json_error("Please enter a valid amount.")
 
-    if not description:
-        return json_error("Please enter a valid description.")
+    if fee_cents is None:
+        return json_error("Please enter a valid transaction fee.")
 
-    if not occurred_at:
-        return json_error("Please enter a valid date.")
+    if not description:
+        return json_error("Use normal letters, numbers, and punctuation for the description.")
+
+    if kind == "external_transfer" and not recipient:
+        return json_error("Please enter a valid recipient.")
+
+    if not occurred:
+        return json_error("Please enter a valid date and time that are not in the future.")
 
     source_account = account_ref(uid, account_id).get()
 
@@ -528,7 +675,7 @@ def create_transaction(decoded_token):
         source_name = source_account.get("name", "Account")
         destination_name = destination_account.get("name", "Account")
 
-        adjust_account_balance(uid, account_id, -amount_cents)
+        adjust_account_balance(uid, account_id, -(amount_cents + fee_cents))
         adjust_account_balance(uid, to_account_id, amount_cents)
 
         transaction_ids.append(
@@ -539,8 +686,11 @@ def create_transaction(decoded_token):
                 f"Transfer to {destination_name}: {description}",
                 "transfer",
                 category,
-                occurred_at,
+                occurred["datetime"],
+                occurred["date"],
+                occurred["time"],
                 transfer_id,
+                fee_cents,
             )
         )
         transaction_ids.append(
@@ -551,11 +701,35 @@ def create_transaction(decoded_token):
                 f"Transfer from {source_name}: {description}",
                 "transfer",
                 category,
-                occurred_at,
+                occurred["datetime"],
+                occurred["date"],
+                occurred["time"],
                 transfer_id,
             )
         )
+    elif kind == "external_transfer":
+        adjust_account_balance(uid, account_id, -(amount_cents + fee_cents))
+
+        transaction_ids.append(
+            write_transaction(
+                uid,
+                account_id,
+                -amount_cents,
+                f"Sent to {recipient}: {description}",
+                "external_transfer",
+                category,
+                occurred["datetime"],
+                occurred["date"],
+                occurred["time"],
+                None,
+                fee_cents,
+                recipient,
+            )
+        )
     else:
+        if fee_cents:
+            return json_error("Transaction fees are only available for transfers.")
+
         signed_amount_cents = amount_cents if kind == "income" else -amount_cents
 
         adjust_account_balance(uid, account_id, signed_amount_cents)
@@ -568,7 +742,9 @@ def create_transaction(decoded_token):
                 description,
                 kind,
                 category,
-                occurred_at,
+                occurred["datetime"],
+                occurred["date"],
+                occurred["time"],
             )
         )
 

@@ -17,7 +17,7 @@
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/dashboard.css') }}?v=15"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=17"
     />
   </head>
 
@@ -63,7 +63,7 @@
             <div class="panel-header compact">
               <div>
                 <h2>New transaction</h2>
-                <p>Record income, spending, or account-to-account transfers.</p>
+                <p>Record income, spending, internal transfers, and external sends.</p>
               </div>
             </div>
 
@@ -81,6 +81,14 @@
                   <input type="radio" name="transaction-kind" value="transfer" />
                   <span>Transfer</span>
                 </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="transaction-kind"
+                    value="external_transfer"
+                  />
+                  <span>Send</span>
+                </label>
               </div>
 
               <div class="form-grid">
@@ -92,6 +100,17 @@
                 <label id="transaction-to-account-label" hidden>
                   <span>To account</span>
                   <select id="transaction-to-account"></select>
+                </label>
+
+                <label id="transaction-recipient-label" hidden>
+                  <span>Recipient</span>
+                  <input
+                    type="text"
+                    id="transaction-recipient"
+                    maxlength="80"
+                    placeholder="Father, landlord, recipient account"
+                    autocomplete="off"
+                  />
                 </label>
 
                 <label>
@@ -111,6 +130,23 @@
                   <span>Date</span>
                   <input type="date" id="transaction-date" required />
                 </label>
+
+                <label>
+                  <span>Time</span>
+                  <input type="time" id="transaction-time" required />
+                </label>
+
+                <label id="transaction-fee-label" hidden>
+                  <span>Transaction fee</span>
+                  <input
+                    type="number"
+                    id="transaction-fee"
+                    min="0"
+                    max="100000"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
+                </label>
               </div>
 
               <label>
@@ -127,13 +163,10 @@
 
               <label>
                 <span>Category</span>
-                <input
-                  type="text"
+                <select
                   id="transaction-category"
-                  maxlength="40"
-                  placeholder="Food, Bills, Income, Savings"
-                  autocomplete="off"
-                />
+                  required
+                ></select>
               </label>
 
               <div id="transaction-form-error" class="inline-error" hidden></div>
@@ -165,7 +198,7 @@
 
             <div id="transactions-empty" class="empty-state" hidden>
               <strong>No transactions yet</strong>
-              <span>Create your first income, expense, or transfer entry.</span>
+              <span>Create your first income, expense, transfer, or external send.</span>
             </div>
 
             <div id="transactions-list" class="transaction-list"></div>
@@ -183,7 +216,7 @@
     ></script>
     <script
       type="module"
-      src="{{ url_for('static', filename='js/transactions.js') }}?v=1"
+      src="{{ url_for('static', filename='js/transactions.js') }}?v=2"
     ></script>
   </body>
 </html>

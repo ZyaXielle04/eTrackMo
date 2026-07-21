@@ -28,8 +28,15 @@ const transactionToAccount = document.getElementById("transaction-to-account");
 const transactionToAccountLabel = document.getElementById(
   "transaction-to-account-label",
 );
+const transactionRecipient = document.getElementById("transaction-recipient");
+const transactionRecipientLabel = document.getElementById(
+  "transaction-recipient-label",
+);
 const transactionAmount = document.getElementById("transaction-amount");
 const transactionDate = document.getElementById("transaction-date");
+const transactionTime = document.getElementById("transaction-time");
+const transactionFee = document.getElementById("transaction-fee");
+const transactionFeeLabel = document.getElementById("transaction-fee-label");
 const transactionDescription = document.getElementById(
   "transaction-description",
 );
@@ -50,8 +57,51 @@ const pesoFormatter = new Intl.NumberFormat("en-PH", {
   style: "currency",
 });
 
+const categoryOptions = {
+  expense: [
+    ["food", "Food"],
+    ["transportation", "Transportation"],
+    ["bills", "Bills"],
+    ["shopping", "Shopping"],
+    ["health", "Health"],
+    ["education", "Education"],
+    ["entertainment", "Entertainment"],
+    ["family", "Family"],
+    ["debt", "Debt"],
+    ["other_expense", "Other expense"],
+  ],
+  income: [
+    ["salary", "Salary"],
+    ["business", "Business"],
+    ["freelance", "Freelance"],
+    ["allowance", "Allowance"],
+    ["refund", "Refund"],
+    ["bonus", "Bonus"],
+    ["other_income", "Other income"],
+  ],
+  transfer: [
+    ["savings", "Savings"],
+    ["cash_in", "Cash in"],
+    ["cash_out", "Cash out"],
+    ["account_transfer", "Account transfer"],
+    ["other_transfer", "Other transfer"],
+  ],
+  external_transfer: [
+    ["family", "Family"],
+    ["remittance", "Remittance"],
+    ["payment", "Payment"],
+    ["debt", "Debt"],
+    ["donation", "Donation"],
+    ["other_send", "Other send"],
+  ],
+};
+
 function today() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function currentTime() {
+  return new Date().toTimeString().slice(0, 5);
 }
 
 function getSelectedKind() {
@@ -64,6 +114,39 @@ function getSelectedKind() {
 
 function formatMoney(amount) {
   return pesoFormatter.format(Number(amount || 0));
+}
+
+function isNormalText(value, minLength, maxLength) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  const pattern = /^[A-Za-z0-9][A-Za-z0-9 .,'&()/_:+#-]*$/;
+
+  return (
+    text.length >= minLength &&
+    text.length <= maxLength &&
+    pattern.test(text)
+  );
+}
+
+function isValidMoney(value, options = {}) {
+  const number = Number(value);
+  const minimum = options.minimum ?? 0.01;
+  const maximum = options.maximum ?? 999999999.99;
+
+  if (!Number.isFinite(number) || number < minimum || number > maximum) {
+    return false;
+  }
+
+  return /^\d+(\.\d{1,2})?$/.test(String(value).trim());
+}
+
+function isValidTime(value) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value || ""));
+}
+
+function isFutureDateTime(dateValue, timeValue) {
+  const selected = new Date(`${dateValue}T${timeValue}`);
+
+  return Number.isNaN(selected.getTime()) || selected > new Date();
 }
 
 function setLoading(isLoading) {
@@ -148,6 +231,29 @@ function renderAccountOptions() {
   );
 }
 
+function renderCategoryOptions(kind) {
+  const options = [
+    ["", "Choose category"],
+    ...(categoryOptions[kind] || []),
+  ].map(function ([value, label]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+
+    return option;
+  });
+
+  transactionCategory.replaceChildren(...options);
+}
+
+function getCategoryLabel(kind, category) {
+  return (
+    (categoryOptions[kind] || []).find(function ([value]) {
+      return value === category;
+    })?.[1] || category
+  );
+}
+
 function renderTransactions() {
   transactionsList.replaceChildren();
   transactionsEmpty.hidden = transactions.length > 0;
@@ -169,8 +275,10 @@ function renderTransactions() {
     const meta = document.createElement("small");
     meta.textContent = [
       transaction.accountName,
-      transaction.category,
+      transaction.recipient,
+      getCategoryLabel(transaction.kind, transaction.category),
       transaction.occurredAt,
+      transaction.feeCents ? `Fee ${formatMoney(transaction.fee)}` : "",
     ].filter(Boolean).join(" - ");
 
     body.append(title, meta);
@@ -187,23 +295,42 @@ function renderTransactions() {
 function updateKindUi() {
   const kind = getSelectedKind();
   const isTransfer = kind === "transfer";
+  const isExternalTransfer = kind === "external_transfer";
 
   transactionToAccountLabel.hidden = !isTransfer;
   transactionToAccount.required = isTransfer;
+  transactionRecipientLabel.hidden = !isExternalTransfer;
+  transactionRecipient.required = isExternalTransfer;
+  transactionFeeLabel.hidden = !(isTransfer || isExternalTransfer);
+
+  if (!isTransfer) {
+    transactionToAccount.value = "";
+  }
+
+  if (!isExternalTransfer) {
+    transactionRecipient.value = "";
+  }
+
+  if (!isTransfer && !isExternalTransfer) {
+    transactionFee.value = "";
+  }
+
+  renderCategoryOptions(kind);
 
   if (kind === "income") {
     transactionDescription.placeholder = "Salary, sale, refund";
-    transactionCategory.placeholder = "Salary, Income, Refund";
   } else if (kind === "transfer") {
     transactionDescription.placeholder = "Move money to another account";
-    transactionCategory.placeholder = "Savings, Transfer";
+  } else if (kind === "external_transfer") {
+    transactionDescription.placeholder = "Send money outside eTrackMo";
   } else {
     transactionDescription.placeholder = "Groceries, rent, bills";
-    transactionCategory.placeholder = "Food, Bills, Transport";
   }
 }
 
 function validateLocalForm() {
+  const kind = getSelectedKind();
+
   if (!accounts.length) {
     return "Create an account before recording transactions.";
   }
@@ -212,7 +339,7 @@ function validateLocalForm() {
     return "Please choose an account.";
   }
 
-  if (getSelectedKind() === "transfer") {
+  if (kind === "transfer") {
     if (!transactionToAccount.value) {
       return "Please choose a destination account.";
     }
@@ -222,8 +349,52 @@ function validateLocalForm() {
     }
   }
 
-  if (Number(transactionAmount.value) <= 0) {
+  if (
+    kind === "external_transfer" &&
+    !isNormalText(transactionRecipient.value, 2, 80)
+  ) {
+    return "Use normal letters, numbers, and punctuation for the recipient.";
+  }
+
+  if (!isValidMoney(transactionAmount.value)) {
     return "Please enter a valid amount.";
+  }
+
+  if (
+    transactionFee.value &&
+    !isValidMoney(transactionFee.value, {
+      maximum: 100000,
+      minimum: 0,
+    })
+  ) {
+    return "Please enter a valid transaction fee.";
+  }
+
+  if (
+    (kind === "income" || kind === "expense") &&
+    Number(transactionFee.value || 0) > 0
+  ) {
+    return "Transaction fees are only available for transfers.";
+  }
+
+  if (!isNormalText(transactionDescription.value, 2, 120)) {
+    return "Use normal letters, numbers, and punctuation for the description.";
+  }
+
+  if (!transactionCategory.value) {
+    return "Please choose a category.";
+  }
+
+  if (!transactionDate.value || transactionDate.value > today()) {
+    return "Please choose a date that is not in the future.";
+  }
+
+  if (!isValidTime(transactionTime.value)) {
+    return "Please choose a valid time.";
+  }
+
+  if (isFutureDateTime(transactionDate.value, transactionTime.value)) {
+    return "Please choose a date and time that are not in the future.";
   }
 
   return "";
@@ -235,8 +406,11 @@ function getPayload() {
     amount: transactionAmount.value,
     category: transactionCategory.value,
     description: transactionDescription.value,
+    fee: transactionFee.value,
     kind: getSelectedKind(),
     occurredAt: transactionDate.value,
+    occurredTime: transactionTime.value,
+    recipient: transactionRecipient.value,
     toAccountId: transactionToAccount.value,
   };
 }
@@ -270,6 +444,7 @@ transactionKindInputs.forEach(function (input) {
 transactionForm.addEventListener("reset", function () {
   window.setTimeout(function () {
     transactionDate.value = today();
+    transactionTime.value = currentTime();
     clearFormError();
     updateKindUi();
   }, 0);
@@ -319,6 +494,7 @@ onAuthStateChanged(auth, async function (user) {
 
   currentUser = auth.currentUser;
   transactionDate.value = today();
+  transactionTime.value = currentTime();
   updateKindUi();
   loadData();
 });
