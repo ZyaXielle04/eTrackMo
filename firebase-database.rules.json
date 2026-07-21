@@ -24,6 +24,24 @@
         ".write": false
       }
     },
+    "coops": {
+      "$coopId": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "coopInviteCodes": {
+      "$code": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "userCoops": {
+      "$uid": {
+        ".read": false,
+        ".write": false
+      }
+    },
     "groups": {
       "$groupId": {
         ".read": "auth !== null && data.child('members').child(auth.uid).exists()",

@@ -16,6 +16,7 @@
 - The Coop owner can accept or deny join requests.
 - Each user can join multiple Coops.
 - Coop visibility is permission-based: users choose what account data, balances, and transactions other Coop members can see.
+- Initial Coop permissions include account names, balances, and transactions.
 
 ## Initial App Pages
 

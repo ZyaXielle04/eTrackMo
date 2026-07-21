@@ -15,4 +15,5 @@ from app.routes.api.common import parse_positive_amount_cents
 
 from app.routes.api import accounts
 from app.routes.api import auth_profile
+from app.routes.api import coops
 from app.routes.api import transactions

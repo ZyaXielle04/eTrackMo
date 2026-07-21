@@ -49,6 +49,18 @@ class SecuritySmokeTests(unittest.TestCase):
         self.assertEqual(response.get_json(), {"error": "Unauthorized."})
 
     @mock.patch("app.initialize_firebase")
+    def test_coops_requires_firebase_bearer_token(self, initialize_firebase):
+        from app import create_app
+
+        app = create_app()
+        client = app.test_client()
+
+        response = client.get("/api/coops")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Unauthorized."})
+
+    @mock.patch("app.initialize_firebase")
     def test_transactions_page_renders(self, initialize_firebase):
         from app import create_app
 
@@ -71,6 +83,18 @@ class SecuritySmokeTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Transaction history", response.data)
+
+    @mock.patch("app.initialize_firebase")
+    def test_coop_page_renders(self, initialize_firebase):
+        from app import create_app
+
+        app = create_app()
+        client = app.test_client()
+
+        response = client.get("/coop")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Create Coop", response.data)
 
     @mock.patch("app.initialize_firebase")
     def test_account_writes_require_csrf(self, initialize_firebase):

@@ -1055,6 +1055,216 @@ a {
   color: var(--danger);
 }
 
+.coop-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.coop-action-panel {
+  min-height: 320px;
+}
+
+.coop-workspace {
+  min-height: 520px;
+}
+
+.permission-box,
+.permission-toggle-form {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--panel-muted);
+}
+
+.permission-box strong {
+  font-size: 0.86rem;
+}
+
+.permission-box label,
+.permission-toggle-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.permission-box input,
+.permission-toggle-form input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+
+.coop-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.coop-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #ffffff, var(--panel-muted));
+}
+
+.coop-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.coop-card-header h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.coop-card-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.coop-role {
+  flex: 0 0 auto;
+  padding: 0.26rem 0.55rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.coop-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.coop-stats span {
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.72rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.coop-stats strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coop-section {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.coop-section > strong {
+  font-size: 0.9rem;
+}
+
+.coop-member-list,
+.coop-request-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.coop-member-row,
+.coop-request-row {
+  display: grid;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.coop-member-row {
+  grid-template-columns: auto minmax(0, 0.75fr) minmax(220px, 1fr);
+}
+
+.coop-request-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.coop-member-row > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius);
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.coop-member-row div,
+.coop-request-row div {
+  min-width: 0;
+}
+
+.coop-member-row strong,
+.coop-request-row strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coop-member-row small,
+.coop-request-row small {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.permission-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.permission-pills span {
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.permission-pills .enabled {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.permission-pills .disabled {
+  background: #f1f5f9;
+  color: var(--muted);
+}
+
+.coop-request-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
 .activity-panel {
   grid-column: 1 / -1;
 }
@@ -1419,6 +1629,10 @@ meter::-webkit-meter-optimum-value {
   .history-filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .coop-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1600,6 +1814,19 @@ meter::-webkit-meter-optimum-value {
 
   .history-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coop-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .coop-member-row,
+  .coop-request-row {
+    grid-template-columns: 1fr;
+  }
+
+  .coop-request-actions {
+    flex-direction: column;
   }
 }
 

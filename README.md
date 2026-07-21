@@ -17,6 +17,7 @@ Admin SDK on the backend for trusted database writes.
 - Searchable and filterable transaction history page
 - Polished responsive styling across auth, dashboard, account, transaction, and history pages
 - Split backend API routes into feature-focused modules before Coop development
+- Coop creation, invite-code join requests, owner approvals, and granular sharing permissions
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration
@@ -26,9 +27,8 @@ Admin SDK on the backend for trusted database writes.
 
 - Transaction editing and deletion
 - Multi-account finance overview
-- Coop groups for permission-based financial visibility between users
-- Invite codes or links for Coop join requests
-- Coop owner approval or denial of membership requests
+- Coop data visibility views for approved members
+- Invite links for Coop join requests
 
 ## Tech Stack
 
@@ -51,6 +51,7 @@ app/
       accounts.py
       auth_profile.py
       common.py
+      coops.py
       transactions.py
     __init__.py
     auth.py

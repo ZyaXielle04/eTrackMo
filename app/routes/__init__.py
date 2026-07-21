@@ -111,15 +111,9 @@ def history():
 def coop():
 
     return render_template(
-        "internal_page.html",
+        "coop.html",
         firebase_config=get_firebase_config(),
-        active_page="coop",
-        page_title="Coop",
-        page_kicker="Shared finance",
-        page_heading="Coop",
-        page_description="Create Coops, join by invite code, and manage shared finance permissions.",
-        panel_title="Coop workspace",
-        panel_body="This page will contain Coop creation, join requests, members, and sharing permissions."
+        active_page="coop"
     )
 
 
