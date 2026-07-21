@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="{{ page_description }}" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>{{ page_title }} | eTrackMo</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=10"
+    />
+  </head>
+
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-gate-card">
+        <img
+          src="{{ url_for('static', filename='images/hero-logo.png') }}"
+          alt="eTrackMo Logo"
+        />
+        <strong>Opening {{ page_title | lower }}</strong>
+        <span>Checking your secure session...</span>
+      </div>
+    </div>
+
+    <div id="dashboard-app" class="dashboard-app" hidden>
+      {% include "partials/sidebar.html" %}
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div class="topbar-heading">
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="sidebar-toggle"
+              aria-controls="sidebar"
+              aria-expanded="false"
+              aria-label="Open navigation"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div>
+              <span class="page-kicker">{{ page_kicker }}</span>
+              <h1>{{ page_heading }}</h1>
+            </div>
+          </div>
+          <div class="topbar-actions"></div>
+        </header>
+
+        <section class="page-shell">
+          <article class="panel page-empty">
+            <span>{{ page_title }}</span>
+            <h2>{{ panel_title }}</h2>
+            <p>{{ panel_body }}</p>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/dashboard.js') }}?v=11"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Record income, expenses, and transfers across your accounts."
+    />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Transactions | eTrackMo</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=15"
+    />
+  </head>
+
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-gate-card">
+        <img
+          src="{{ url_for('static', filename='images/hero-logo.png') }}"
+          alt="eTrackMo Logo"
+        />
+        <strong>Opening transactions</strong>
+        <span>Checking your secure session...</span>
+      </div>
+    </div>
+
+    <div id="dashboard-app" class="dashboard-app" hidden>
+      {% include "partials/sidebar.html" %}
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div class="topbar-heading">
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="sidebar-toggle"
+              aria-controls="sidebar"
+              aria-expanded="false"
+              aria-label="Open navigation"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div>
+              <span class="page-kicker">Money movement</span>
+              <h1>Transactions</h1>
+            </div>
+          </div>
+        </header>
+
+        <section class="transactions-layout">
+          <article class="panel transaction-form-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>New transaction</h2>
+                <p>Record income, spending, or account-to-account transfers.</p>
+              </div>
+            </div>
+
+            <form id="transaction-form" class="account-form">
+              <div class="transaction-kind-control" role="group" aria-label="Transaction type">
+                <label>
+                  <input type="radio" name="transaction-kind" value="expense" checked />
+                  <span>Expense</span>
+                </label>
+                <label>
+                  <input type="radio" name="transaction-kind" value="income" />
+                  <span>Income</span>
+                </label>
+                <label>
+                  <input type="radio" name="transaction-kind" value="transfer" />
+                  <span>Transfer</span>
+                </label>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Account</span>
+                  <select id="transaction-account" required></select>
+                </label>
+
+                <label id="transaction-to-account-label" hidden>
+                  <span>To account</span>
+                  <select id="transaction-to-account"></select>
+                </label>
+
+                <label>
+                  <span>Amount</span>
+                  <input
+                    type="number"
+                    id="transaction-amount"
+                    min="0.01"
+                    max="999999999.99"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </label>
+
+                <label>
+                  <span>Date</span>
+                  <input type="date" id="transaction-date" required />
+                </label>
+              </div>
+
+              <label>
+                <span>Description</span>
+                <input
+                  type="text"
+                  id="transaction-description"
+                  maxlength="120"
+                  placeholder="Groceries, salary, transfer to savings"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+
+              <label>
+                <span>Category</span>
+                <input
+                  type="text"
+                  id="transaction-category"
+                  maxlength="40"
+                  placeholder="Food, Bills, Income, Savings"
+                  autocomplete="off"
+                />
+              </label>
+
+              <div id="transaction-form-error" class="inline-error" hidden></div>
+
+              <div class="modal-actions">
+                <button type="reset" id="reset-transaction-button" class="secondary-action">
+                  Clear
+                </button>
+                <button type="submit" id="save-transaction-button" class="primary-action">
+                  Record transaction
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel transaction-list-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Recent activity</h2>
+                <p>Your latest account movements.</p>
+              </div>
+            </div>
+
+            <div id="transactions-loading" class="inline-state">
+              Loading transactions...
+            </div>
+
+            <div id="transactions-error" class="inline-error" hidden></div>
+
+            <div id="transactions-empty" class="empty-state" hidden>
+              <strong>No transactions yet</strong>
+              <span>Create your first income, expense, or transfer entry.</span>
+            </div>
+
+            <div id="transactions-list" class="transaction-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/dashboard.js') }}?v=13"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/transactions.js') }}?v=1"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Create your eTrackMo account." />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Create Account | eTrackMo</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/auth.css') }}"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <meta name="theme-color" content="#2563eb" />
+  </head>
+
+  <body class="page-transition">
+    <main class="auth-page">
+      <section class="auth-brand-panel">
+        <div class="auth-brand-content">
+          <a href="{{ url_for('main.index') }}" class="auth-brand">
+            <img
+              src="{{ url_for('static', filename='images/hero-logo.png') }}"
+              alt="eTrackMo Logo"
+              class="auth-brand-logo"
+            />
+
+            <span class="auth-brand-name">
+              eTrackMo
+            </span>
+          </a>
+
+          <div class="auth-brand-message">
+            <span class="eyebrow"> Personal Finance Management </span>
+
+            <h1>
+              Build a clearer
+              <span>financial future.</span>
+            </h1>
+
+            <p>
+              Organize your finances, understand your financial life, and decide
+              exactly what information you share with the people and groups you
+              trust.
+            </p>
+          </div>
+
+          <div class="auth-trust-items">
+            <div class="auth-trust-item">
+              <strong> One place for your finances </strong>
+
+              <span>
+                Keep your accounts and financial activity organized.
+              </span>
+            </div>
+
+            <div class="auth-trust-item">
+              <strong> Share with confidence </strong>
+
+              <span> You decide exactly what information others can see. </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-form-panel">
+        <div class="auth-form-container">
+          <div class="auth-form-header">
+            <h2>Create your account</h2>
+
+            <p>Start building a clearer view of your financial life.</p>
+          </div>
+
+          <form id="register-form" class="auth-form">
+            <div class="form-group">
+              <label for="display-name"> Full name </label>
+
+              <input
+                type="text"
+                id="display-name"
+                name="display-name"
+                placeholder="Your full name"
+                autocomplete="name"
+                maxlength="80"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email"> Email address </label>
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                maxlength="254"
+                spellcheck="false"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password"> Password </label>
+
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Create a strong password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  maxlength="32"
+                  required
+                />
+
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-password-target="password"
+                  aria-label="Show password"
+                >
+                  Show
+                </button>
+              </div>
+
+              <div id="password-requirements" class="password-requirements">
+                <span id="password-length"> 8–32 characters </span>
+
+                <span id="password-uppercase"> One uppercase letter </span>
+
+                <span id="password-lowercase"> One lowercase letter </span>
+
+                <span id="password-number"> One number </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirm-password"> Confirm password </label>
+
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="confirm-password"
+                  name="confirm-password"
+                  placeholder="Re-enter your password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  maxlength="32"
+                  required
+                />
+
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-password-target="confirm-password"
+                  aria-label="Show password"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+
+            <label class="switch-control">
+              <input type="checkbox" id="terms" name="terms" required />
+
+              <span class="switch-slider"></span>
+
+              <span class="switch-label">
+                I agree to the
+                <a href="{{ url_for('main.terms') }}"> Terms of Service </a>
+
+                <a href="{{ url_for('main.privacy') }}"> Privacy Policy </a>
+              </span>
+            </label>
+
+            <div
+              id="register-error"
+              class="form-error"
+              role="alert"
+              hidden
+            ></div>
+
+            <button
+              type="submit"
+              class="button button-primary auth-submit-button"
+            >
+              Create Account
+            </button>
+          </form>
+
+          <div class="auth-divider">
+            <span> OR </span>
+          </div>
+
+          <p class="auth-switch">
+            Already have an account?
+
+            <a href="/login" class="form-link"> Sign in </a>
+          </p>
+
+          <p class="auth-legal">
+            Your account is protected by secure authentication infrastructure.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("page-loaded");
+
+        document.querySelectorAll("a[href]").forEach(function (link) {
+          const href = link.getAttribute("href");
+
+          if (
+            !href ||
+            href.startsWith("#") ||
+            href.startsWith("http") ||
+            href.startsWith("mailto:") ||
+            href.startsWith("tel:") ||
+            link.target === "_blank"
+          ) {
+            return;
+          }
+
+          link.addEventListener("click", function (event) {
+            if (
+              event.ctrlKey ||
+              event.metaKey ||
+              event.shiftKey ||
+              event.altKey
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+
+            document.body.classList.remove("page-loaded");
+            document.body.classList.add("page-exit");
+
+            setTimeout(function () {
+              window.location.href = href;
+            }, 250);
+          });
+        });
+      });
+
+      window.addEventListener("pageshow", function () {
+        document.body.classList.remove("page-exit");
+        document.body.classList.add("page-loaded");
+      });
+    </script>
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/register.js') }}?v=secure"
+    ></script>
+  </body>
+</html>

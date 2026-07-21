@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="description" content="Verify your eTrackMo account email." />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <title>Verify Email | eTrackMo</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <meta name="theme-color" content="#2563eb" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/auth.css') }}"
+    />
+  </head>
+
+  <body class="page-transition">
+    <main class="auth-page">
+      <section class="auth-brand-panel">
+        <div class="auth-brand-content">
+          <a href="{{ url_for('main.index') }}" class="auth-brand">
+            <img
+              src="{{ url_for('static', filename='images/hero-logo.png') }}"
+              alt="eTrackMo Logo"
+              class="auth-brand-logo"
+            />
+
+            <span class="auth-brand-name">
+              eTrackMo
+            </span>
+          </a>
+
+          <div class="auth-brand-message">
+            <span class="eyebrow"> Account Verification </span>
+
+            <h1>
+              One quick check,
+              <span>then you're in.</span>
+            </h1>
+
+            <p>
+              Verify your email address so your eTrackMo account is easier to
+              protect and recover.
+            </p>
+          </div>
+
+          <div class="auth-trust-items">
+            <div class="auth-trust-item">
+              <strong> Account protection </strong>
+
+              <span> Email verification helps secure account recovery. </span>
+            </div>
+
+            <div class="auth-trust-item">
+              <strong> Ready for next steps </strong>
+
+              <span> Continue after opening the verification link. </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-form-panel">
+        <div class="auth-form-container">
+          <div class="auth-form-header">
+            <h2>Check your inbox</h2>
+
+            <p>
+              We sent a verification link to the email address you used during
+              registration.
+            </p>
+          </div>
+
+          <div class="auth-form">
+            <div
+              id="verify-email-message"
+              class="form-message"
+              role="status"
+            >
+              Open the link from Firebase, then return here and continue.
+            </div>
+
+            <div
+              id="verify-email-error"
+              class="form-error"
+              role="alert"
+              hidden
+            ></div>
+
+            <button
+              type="button"
+              id="continue-button"
+              class="button button-primary auth-submit-button"
+            >
+              I've verified my email
+            </button>
+
+            <button
+              type="button"
+              id="resend-button"
+              class="button button-secondary auth-submit-button"
+            >
+              Resend verification email
+            </button>
+          </div>
+
+          <p class="auth-switch">
+            Already verified?
+
+            <a href="{{ url_for('main.login') }}" class="form-link">
+              Sign in
+            </a>
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("page-loaded");
+
+        document.querySelectorAll("a[href]").forEach(function (link) {
+          const href = link.getAttribute("href");
+
+          if (
+            !href ||
+            href.startsWith("#") ||
+            href.startsWith("http") ||
+            href.startsWith("mailto:") ||
+            href.startsWith("tel:") ||
+            link.target === "_blank"
+          ) {
+            return;
+          }
+
+          link.addEventListener("click", function (event) {
+            if (
+              event.ctrlKey ||
+              event.metaKey ||
+              event.shiftKey ||
+              event.altKey
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+
+            document.body.classList.remove("page-loaded");
+
+            document.body.classList.add("page-exit");
+
+            setTimeout(function () {
+              window.location.href = href;
+            }, 250);
+          });
+        });
+      });
+
+      window.addEventListener("pageshow", function () {
+        document.body.classList.remove("page-exit");
+
+        document.body.classList.add("page-loaded");
+      });
+    </script>
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/verify-email.js') }}?v=secure"
+    ></script>
+  </body>
+</html>

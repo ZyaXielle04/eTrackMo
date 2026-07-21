@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Create accounts, edit balances, and organize your money."
+    />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Accounts | eTrackMo</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=14"
+    />
+  </head>
+
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-gate-card">
+        <img
+          src="{{ url_for('static', filename='images/hero-logo.png') }}"
+          alt="eTrackMo Logo"
+        />
+        <strong>Opening accounts</strong>
+        <span>Checking your secure session...</span>
+      </div>
+    </div>
+
+    <div id="dashboard-app" class="dashboard-app" hidden>
+      {% include "partials/sidebar.html" %}
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div class="topbar-heading">
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="sidebar-toggle"
+              aria-controls="sidebar"
+              aria-expanded="false"
+              aria-label="Open navigation"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div>
+              <span class="page-kicker">Account management</span>
+              <h1>Accounts</h1>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <button type="button" id="open-account-modal" class="primary-action">
+              Add account
+            </button>
+          </div>
+        </header>
+
+        <section class="accounts-summary" aria-label="Accounts summary">
+          <article class="metric-card metric-card-primary">
+            <div class="metric-topline">
+              <span>Total balance</span>
+              <small>Live</small>
+            </div>
+            <strong id="accounts-total-balance">PHP 0.00</strong>
+            <p id="accounts-total-label">Across 0 accounts</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Accounts</span>
+              <small>Owned</small>
+            </div>
+            <strong id="accounts-count">0</strong>
+            <p>Created by you</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Largest account</span>
+              <small>Balance</small>
+            </div>
+            <strong id="largest-account">None</strong>
+            <p id="largest-account-balance">PHP 0.00</p>
+          </article>
+        </section>
+
+        <section class="accounts-workspace">
+          <article class="panel accounts-list-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Your accounts</h2>
+                <p>Manage account names, types, and current balances.</p>
+              </div>
+            </div>
+
+            <div id="accounts-loading" class="inline-state">
+              Loading accounts...
+            </div>
+
+            <div id="accounts-error" class="inline-error" hidden></div>
+
+            <div id="accounts-empty" class="empty-state" hidden>
+              <strong>No accounts yet</strong>
+              <span>Add Cash, GCash, Maya, Bank, or any account you track.</span>
+              <button type="button" class="secondary-action" data-open-account-modal>
+                Add your first account
+              </button>
+            </div>
+
+            <div id="accounts-list" class="accounts-card-grid"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div id="account-modal" class="modal-backdrop" hidden>
+      <section
+        class="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="account-modal-title"
+      >
+        <div class="modal-header">
+          <div>
+            <span class="page-kicker">Account details</span>
+            <h2 id="account-modal-title">Add account</h2>
+          </div>
+          <button type="button" id="close-account-modal" class="modal-close">
+            Close
+          </button>
+        </div>
+
+        <form id="account-form" class="account-form">
+          <input type="hidden" id="account-id" />
+
+          <div class="form-grid">
+            <label>
+              <span>Account name</span>
+              <input
+                type="text"
+                id="account-name"
+                maxlength="60"
+                placeholder="Cash, GCash, Maya, BDO Savings"
+                autocomplete="off"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Type</span>
+              <select id="account-type" required>
+                <option value="cash">Cash</option>
+                <option value="gcash">GCash</option>
+                <option value="maya">Maya</option>
+                <option value="bank">Bank</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Institution</span>
+              <input
+                type="text"
+                id="account-institution"
+                maxlength="80"
+                placeholder="Optional"
+                autocomplete="off"
+              />
+            </label>
+
+            <label>
+              <span>Balance</span>
+              <input
+                type="number"
+                id="account-balance"
+                min="-999999999.99"
+                max="999999999.99"
+                step="0.01"
+                placeholder="0.00"
+                required
+              />
+            </label>
+          </div>
+
+          <label>
+            <span>Notes</span>
+            <textarea
+              id="account-notes"
+              maxlength="180"
+              rows="3"
+              placeholder="Optional notes for this account"
+            ></textarea>
+          </label>
+
+          <div id="account-form-error" class="inline-error" hidden></div>
+
+          <div class="modal-actions">
+            <button type="button" id="delete-account-button" class="danger-action" hidden>
+              Delete
+            </button>
+            <button type="button" id="cancel-account-button" class="secondary-action">
+              Cancel
+            </button>
+            <button type="submit" id="save-account-button" class="primary-action">
+              Save account
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/dashboard.js') }}?v=13"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/accounts.js') }}?v=3"
+    ></script>
+  </body>
+</html>

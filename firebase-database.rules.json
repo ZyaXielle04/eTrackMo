@@ -1,0 +1,40 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth !== null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "accounts": {
+      "$uid": {
+        ".read": "auth !== null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "transactions": {
+      "$uid": {
+        ".read": "auth !== null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "auditLogs": {
+      "$uid": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "groups": {
+      "$groupId": {
+        ".read": "auth !== null && data.child('members').child(auth.uid).exists()",
+        ".write": "auth !== null && ((!data.exists() && newData.child('ownerId').val() === auth.uid) || data.child('ownerId').val() === auth.uid)"
+      }
+    },
+    "userGroups": {
+      "$uid": {
+        ".read": "auth !== null && auth.uid === $uid",
+        ".write": false
+      }
+    }
+  }
+}

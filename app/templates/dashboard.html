@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="description" content="Your eTrackMo financial dashboard." />
+
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <title>Dashboard | eTrackMo</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      href="{{ url_for('static', filename='images/hero-logo.png') }}"
+    />
+
+    <meta name="theme-color" content="#0f172a" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}?v=10"
+    />
+  </head>
+
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-gate-card">
+        <img
+          src="{{ url_for('static', filename='images/hero-logo.png') }}"
+          alt="eTrackMo Logo"
+        />
+
+        <strong>Opening your dashboard</strong>
+
+        <span>Checking your secure session...</span>
+      </div>
+    </div>
+
+    <div id="dashboard-app" class="dashboard-app" hidden>
+      {% include "partials/sidebar.html" %}
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div class="topbar-heading">
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="sidebar-toggle"
+              aria-controls="sidebar"
+              aria-expanded="false"
+              aria-label="Open navigation"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+
+            <div>
+            <span class="page-kicker">Personal finance command center</span>
+
+            <h1>
+              Welcome back,
+              <span id="user-name">there</span>
+            </h1>
+            </div>
+          </div>
+
+          <div class="topbar-actions"></div>
+        </header>
+
+        <section id="overview" class="summary-grid" aria-label="Financial summary">
+          <article class="metric-card metric-card-primary">
+            <div class="metric-topline">
+              <span>Total balance</span>
+              <small>Live</small>
+            </div>
+            <strong>PHP 128,450.00</strong>
+            <p>Across 3 tracked accounts</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Monthly income</span>
+              <small class="trend-positive">+8.4%</small>
+            </div>
+            <strong>PHP 42,000.00</strong>
+            <p>Compared with last month</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Monthly spending</span>
+              <small>59%</small>
+            </div>
+            <strong>PHP 24,860.00</strong>
+            <p>Of planned budget used</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-topline">
+              <span>Shared groups</span>
+              <small>Private</small>
+            </div>
+            <strong>2 active</strong>
+            <p>Selected access only</p>
+          </article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel balance-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Cashflow</h2>
+                <p>Money movement over the last 6 months.</p>
+              </div>
+
+              <select aria-label="Cashflow range">
+                <option>6 months</option>
+                <option>12 months</option>
+              </select>
+            </div>
+
+            <div class="bar-chart" aria-label="Cashflow chart">
+              <div class="bar-feb"><b>58k</b><span>Feb</span></div>
+              <div class="bar-mar"><b>72k</b><span>Mar</span></div>
+              <div class="bar-apr"><b>46k</b><span>Apr</span></div>
+              <div class="bar-may"><b>82k</b><span>May</span></div>
+              <div class="bar-jun"><b>64k</b><span>Jun</span></div>
+              <div class="bar-jul"><b>90k</b><span>Jul</span></div>
+            </div>
+          </article>
+
+          <article id="accounts" class="panel accounts-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Accounts</h2>
+                <p>Tracked balances.</p>
+              </div>
+
+              <button type="button" class="secondary-action">Add</button>
+            </div>
+
+            <div class="account-list">
+              <div class="account-row">
+                <span class="account-mark">C</span>
+                <div>
+                  <strong>Cash</strong>
+                  <small>Personal wallet</small>
+                </div>
+                <b>PHP 24,500</b>
+              </div>
+
+              <div class="account-row">
+                <span class="account-mark">G</span>
+                <div>
+                  <strong>GCash</strong>
+                  <small>E-wallet</small>
+                </div>
+                <b>PHP 18,950</b>
+              </div>
+
+              <div class="account-row">
+                <span class="account-mark">B</span>
+                <div>
+                  <strong>BDO Savings</strong>
+                  <small>Bank account</small>
+                </div>
+                <b>PHP 85,000</b>
+              </div>
+            </div>
+          </article>
+
+          <article id="activity" class="panel activity-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Recent activity</h2>
+                <p>Latest tracked transactions.</p>
+              </div>
+
+              <button type="button" class="secondary-action">Export</button>
+            </div>
+
+            <div class="transaction-table">
+              <div class="transaction-row table-head">
+                <span>Merchant</span>
+                <span>Category</span>
+                <span>Date</span>
+                <span>Amount</span>
+              </div>
+
+              <div class="transaction-row">
+                <span>Grocery run</span>
+                <span>Food</span>
+                <span>Jul 21</span>
+                <strong>-PHP 1,840</strong>
+              </div>
+
+              <div class="transaction-row">
+                <span>Freelance payout</span>
+                <span>Income</span>
+                <span>Jul 20</span>
+                <strong class="positive">+PHP 12,000</strong>
+              </div>
+
+              <div class="transaction-row">
+                <span>Internet bill</span>
+                <span>Utilities</span>
+                <span>Jul 18</span>
+                <strong>-PHP 1,699</strong>
+              </div>
+            </div>
+          </article>
+
+          <article id="budgets" class="panel budget-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Budgets</h2>
+                <p>Spend limits this month.</p>
+              </div>
+            </div>
+
+            <div class="budget-list">
+              <div class="budget-item">
+                <div>
+                  <strong>Food</strong>
+                  <span>PHP 8,200 of PHP 12,000</span>
+                </div>
+                <meter min="0" max="12000" value="8200"></meter>
+              </div>
+
+              <div class="budget-item">
+                <div>
+                  <strong>Transport</strong>
+                  <span>PHP 3,400 of PHP 6,000</span>
+                </div>
+                <meter min="0" max="6000" value="3400"></meter>
+              </div>
+
+              <div class="budget-item">
+                <div>
+                  <strong>Savings</strong>
+                  <span>PHP 10,000 goal reached</span>
+                </div>
+                <meter min="0" max="10000" value="10000"></meter>
+              </div>
+            </div>
+          </article>
+
+          <article id="sharing" class="panel sharing-panel">
+            <div class="panel-header compact">
+              <div>
+                <h2>Shared access</h2>
+                <p>People and groups with selected visibility.</p>
+              </div>
+
+              <button type="button" class="secondary-action">Manage</button>
+            </div>
+
+            <div class="sharing-list">
+              <div class="sharing-row">
+                <span>F</span>
+                <div>
+                  <strong>Family Group</strong>
+                  <small>Can view GCash and Cash summaries</small>
+                </div>
+                <b>4 members</b>
+              </div>
+
+              <div class="sharing-row">
+                <span>S</span>
+                <div>
+                  <strong>Savings Group</strong>
+                  <small>Can view monthly savings goal only</small>
+                </div>
+                <b>8 members</b>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.firebaseConfig = {{ firebase_config | tojson }};
+    </script>
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/dashboard.js') }}?v=11"
+    ></script>
+  </body>
+</html>

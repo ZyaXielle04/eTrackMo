@@ -1,0 +1,85 @@
+<div id="sidebar-overlay" class="sidebar-overlay" hidden></div>
+
+<aside id="sidebar" class="sidebar">
+  <button
+    type="button"
+    id="sidebar-close"
+    class="sidebar-close"
+    aria-label="Close navigation"
+  >
+    <span></span>
+    <span></span>
+  </button>
+
+  <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+    <img
+      src="{{ url_for('static', filename='images/hero-logo.png') }}"
+      alt="eTrackMo Logo"
+    />
+
+    <span>eTrackMo</span>
+  </a>
+
+  <nav class="sidebar-nav" aria-label="Dashboard navigation">
+    <a
+      href="{{ url_for('main.dashboard') }}"
+      class="{% if active_page == 'dashboard' %}active{% endif %}"
+    >
+      Dashboard
+    </a>
+
+    <a
+      href="{{ url_for('main.accounts') }}"
+      class="{% if active_page == 'accounts' %}active{% endif %}"
+    >
+      Accounts
+    </a>
+
+    <a
+      href="{{ url_for('main.transactions') }}"
+      class="{% if active_page == 'transactions' %}active{% endif %}"
+    >
+      Transactions
+    </a>
+
+    <a
+      href="{{ url_for('main.history') }}"
+      class="{% if active_page == 'history' %}active{% endif %}"
+    >
+      History
+    </a>
+
+    <a
+      href="{{ url_for('main.coop') }}"
+      class="{% if active_page == 'coop' %}active{% endif %}"
+    >
+      Coop
+    </a>
+  </nav>
+
+  <div class="sidebar-status">
+    <span class="status-dot"></span>
+
+    <div>
+      <strong>Private workspace</strong>
+      <span>Email verified</span>
+    </div>
+  </div>
+
+  <div class="sidebar-account">
+    <div class="sidebar-user">
+      <div class="user-chip" title="Current account">
+        <span id="user-initials">ET</span>
+      </div>
+
+      <div class="sidebar-user-details">
+        <strong id="sidebar-user-name">Account</strong>
+        <span>Signed in</span>
+      </div>
+    </div>
+
+    <button type="button" id="logout-button" class="logout-button">
+      Sign out
+    </button>
+  </div>
+</aside>
