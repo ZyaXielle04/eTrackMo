@@ -16,6 +16,7 @@ Admin SDK on the backend for trusted database writes.
 - Optional transaction fees for transfer-style money movement
 - Searchable and filterable transaction history page
 - Polished responsive styling across auth, dashboard, account, transaction, and history pages
+- Split backend API routes into feature-focused modules before Coop development
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration
@@ -45,8 +46,13 @@ Admin SDK on the backend for trusted database writes.
 ```text
 app/
   routes/
+    api/
+      __init__.py
+      accounts.py
+      auth_profile.py
+      common.py
+      transactions.py
     __init__.py
-    api.py
     auth.py
   static/
     css/
