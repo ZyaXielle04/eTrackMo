@@ -100,7 +100,7 @@ a {
 
   font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .auth-brand-message {
@@ -121,9 +121,9 @@ a {
 
 .auth-brand-message h1 {
   margin: 0 0 1.5rem;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: 3.4rem;
   line-height: 1.05;
-  letter-spacing: -0.045em;
+  letter-spacing: 0;
 }
 
 .auth-brand-message h1 span {
@@ -186,7 +186,7 @@ a {
 .auth-form-header h2 {
   margin: 0 0 0.5rem;
   font-size: 2rem;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 .auth-form-header p {
@@ -330,7 +330,7 @@ a {
   }
 
   .auth-brand-message h1 {
-    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-size: 3rem;
   }
 }
 
@@ -705,6 +705,6 @@ a {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   line-height: 1;
 }

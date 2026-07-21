@@ -15,6 +15,7 @@ Admin SDK on the backend for trusted database writes.
 - Dropdown-based transaction categories for cleaner reporting data
 - Optional transaction fees for transfer-style money movement
 - Searchable and filterable transaction history page
+- Polished responsive styling across auth, dashboard, account, transaction, and history pages
 - Server-recorded transaction entries with backend balance updates
 - Responsive SaaS-style dashboard layout with shared sidebar partials
 - Firebase Realtime Database integration

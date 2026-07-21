@@ -99,7 +99,7 @@ select {
   color: var(--color-white);
   font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 .brand-logo {
@@ -271,19 +271,19 @@ select {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 h1 {
   margin: 0 0 1.5rem;
-  font-size: clamp(2.75rem, 6vw, 5.25rem);
+  font-size: 4.25rem;
   font-weight: 800;
   line-height: 1.02;
 }
 
 h2 {
   margin: 0 0 1rem;
-  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-size: 2.8rem;
   font-weight: 750;
   line-height: 1.08;
 }
@@ -432,7 +432,7 @@ h3 {
   margin: 0.35rem 0;
   color: var(--color-white);
   font-size: 2rem;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 .preview-accounts {
