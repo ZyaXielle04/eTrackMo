@@ -535,34 +535,41 @@ function renderSharedData(coop) {
 }
 
 function renderSharedMemberData(member, sharedData) {
-  const card = document.createElement("article");
+  const card = document.createElement("details");
   card.className = "coop-shared-member";
-  const heading = document.createElement("div");
+  const heading = document.createElement("summary");
   heading.className = "coop-shared-heading";
   const avatar = document.createElement("span");
   const body = document.createElement("div");
   const title = document.createElement("strong");
   const meta = document.createElement("small");
+  const chevron = document.createElement("span");
+  const content = document.createElement("div");
 
   avatar.className = "coop-shared-avatar";
   avatar.textContent = getInitials(member.displayName);
+  chevron.className = "coop-shared-chevron";
+  chevron.textContent = "Open";
+  content.className = "coop-shared-content";
   title.textContent = member.displayName;
   meta.textContent = "Visible based on this member's permissions";
   body.append(title, meta, renderPermissionPills(member.permissions));
-  heading.append(avatar, body);
+  heading.append(avatar, body, chevron);
   card.append(heading);
 
   if (member.permissions?.shareAccounts) {
-    card.append(renderSharedAccounts(sharedData.accounts || [], member.permissions));
+    content.append(renderSharedAccounts(sharedData.accounts || [], member.permissions));
   } else {
-    card.append(renderSharedEmpty("Accounts are not shared."));
+    content.append(renderSharedEmpty("Accounts are not shared."));
   }
 
   if (member.permissions?.shareTransactions) {
-    card.append(renderSharedTransactions(sharedData.transactions || []));
+    content.append(renderSharedTransactions(sharedData.transactions || []));
   } else {
-    card.append(renderSharedEmpty("Transactions are not shared."));
+    content.append(renderSharedEmpty("Transactions are not shared."));
   }
+
+  card.append(content);
 
   return card;
 }
